@@ -44,4 +44,4 @@ export const projects: Projects[] = [
     },
 ]
 
-export const skills: string[] = ["React", "JavaScript", "TypeScript", "HTML", "CSS", "NodeJS", "Express", "MongoDB", "Python", "C++", "C", "Java", "Git", "GitHub", "VS Code", "Linux", "Firebase"];
+export const skills: string[] = ["React", "JavaScript", "TypeScript", "HTML", "CSS", "NodeJS", "Express", "MongoDB", "Python", "C++", "C", "Java", "Git", "GitHub", "Vim", "Linux", "Firebase"];

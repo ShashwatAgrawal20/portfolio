@@ -47,13 +47,13 @@ const Contact = () => {
     };
 
     return (
-        <section id="contact" className="relative">
+        <section id="contact" className="relative flex justify-center items-center">
             <div className="container px-5 py-10 flex sm:flex-nowrap flex-wrap justify-center">
                 <form
                     ref={formRef}
                     onSubmit={handleSubmit}
                     name="contact"
-                    className="flex flex-col w-3/4 md:py-8 mt-8 md:mt-0"
+                    className="flex flex-col w-[90%]  md:w-3/4 md:py-8 mt-8 md:mt-0"
                 >
                     <div className="flex flex-col justify-center items-center">
                         <h2 className="text-white sm:text-4xl text-3xl mb-1 font-medium title-font">
