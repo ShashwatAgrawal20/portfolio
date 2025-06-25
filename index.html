@@ -1,115 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #1e1e2f;
-            color: #f8f8f2;
-            box-sizing: border-box;
-        }
-
-        .container {
-            text-align: center;
-            max-width: 800px;
-            width: 100%;
-            padding: 20px;
-        }
-
-        .intro h1 {
-            font-size: 2.5em;
-            margin: 0;
-            color: #8be9fd;
-            word-wrap: break-word;
-        }
-
-        .intro p {
-            font-size: 1.5em;
-            margin: 10px 0;
-            color: #bd93f9;
-        }
-
-        .social-links {
-            margin-top: 30px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .social-links a {
-            color: #50fa7b;
-            text-decoration: none;
-            font-size: 1.2em;
-            padding: 10px 15px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            background-color: rgba(80, 250, 123, 0.1);
-            border-radius: 8px;
-        }
-
-        .social-links a:hover {
-            color: #ff79c6;
-            background-color: rgba(255, 121, 198, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .social-links i {
-            margin-right: 8px;
-        }
-
-        @media (max-width: 600px) {
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Shashwat Agrawal - Portfolio</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+        <style>
             body {
-                padding: 10px;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            .intro h1 {
-                font-size: 1.8em;
-            }
-
-            .intro p {
-                font-size: 1.2em;
-            }
-
-            .social-links {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .social-links a {
-                margin: 5px 0;
+                margin: 0;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+                display: flex;
                 justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+                background-color: #080819;
+                color: #f8f8f2;
+                box-sizing: border-box;
             }
-        }
+            .container {
+                text-align: left;
+                max-width: 900px;
+                width: 100%;
+                padding: 20px;
+            }
+            h1, h2 {
+                color: #8be9fd;
+                margin-bottom: 0.3em;
+            }
+            p, li {
+                color: #f8f8f2;
+                font-size: 1.1em;
+                line-height: 1.6;
+            }
+            .tagline {
+                color: #bd93f9;
+                font-size: 1.3em;
+                margin-top: 0;
+                margin-bottom: 1.5em;
+            }
+            .social-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .social-links a {
+                color: #50fa7b;
+                text-decoration: none;
+                font-size: 1.3em;
+                padding: 8px 12px;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                background-color: rgba(80, 250, 123, 0.1);
+                border-radius: 6px;
+                white-space: nowrap;
+            }
+            .social-links a:hover {
+                color: #ff79c6;
+                background-color: rgba(255, 121, 198, 0.1);
+                transform: translateY(-2px);
+                box-shadow: 0 2px 6px rgba(255, 121, 198, 0.3);
+            }
+            .social-links i {
+                /* margin-right: 6px; */
+                min-width: 16px;
+                text-align: center;
+            }
+            .section {
+                margin-top: 40px;
+            }
+            blockquote {
+                color: #6272a4;
+                font-style: italic;
+                border-left: 4px solid #44475a;
+                padding-left: 10px;
+                margin-left: 0;
+            }
+            a {
+                color: #50fa7b;
+                text-decoration: underline dotted;
+            }
+            a:hover {
+                color: #ff79c6;
+                text-decoration: underline solid;
+            }
+            .site-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                border-bottom: 1px solid #44475a;
+                padding-bottom: 10px;
+                margin-bottom: 30px;
+            }
+            .header-left h1 {
+                font-size: 1.8em;
+                color: #8be9fd;
+                margin: 0;
+            }
+            .header-right {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            @media (max-width: 600px) {
+                .site-header {
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                }
+                .header-left {
+                    margin-bottom: 15px;
+                }
+                .header-right {
+                    justify-content: center;
+                    gap: 1.5em;
+                }
+                .social-links a {
+                    font-size: 1.3em;
+                    padding: 6px 10px;
+                }
+            }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="intro">
-            <h1>just a programmer and a neovim user</h1>
-            <p>who uses arch btw</p>
+    </head>
+    <body>
+        <div class="container">
+            <header class="site-header">
+                <div class="header-left">
+                    <h1>Shashwat Agrawal</h1>
+                </div>
+                <div class="header-right social-links">
+                    <a href="https://github.com/ShashwatAgrawal20" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://linkedin.com/in/theshashwatagrawal" target="_blank"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://x.com/theshashwat20" target="_blank"><i class="fab fa-x-twitter"></i></a>
+                    <a href="./Shashwat_Resume.pdf" target="_blank"><i class="fas fa-file-pdf"></i></a>
+                </div>
+            </header>
+
+            <p class="tagline">Systems engineer • Toolsmith • OSS contributor</p>
+            <p>I build low-level tools, runtimes, and infra from scratch, mostly in C, Rust, and Python.</p>
+            <blockquote>No frameworks. No fluff. Just fast, predictable systems.<br/>(Also yes, I use Arch, Neovim, and i3 btw.)</blockquote>
+
+            <section class="section">
+                <h2>What I Build</h2>
+                <ul>
+                    <li><strong>Low‑level runtimes & tooling:</strong>
+                        <ul>
+                            <li><a href="https://github.com/ShashwatAgrawal20/byte_machine" target="_blank">Rust 8‑bit VM</a></li>
+                            <li><a href="https://github.com/ShashwatAgrawal20/rust-http-server" target="_blank">Multithreaded HTTP server</a></li>
+                            <li><a href="https://github.com/ShashwatAgrawal20/numguess-bootloader-deeznuts" target="_blank">Bootloader games in ASM</a></li>
+                            <li><a href="https://github.com/ShashwatAgrawal20/numc" target="_blank">NumPy clone in C (WIP)</a></li>
+                        </ul>
+                    </li>
+                    <li><strong>Infrastructure & toolkits:</strong>
+                        <ul>
+                            <li><a href="https://github.com/ShashwatAgrawal20/python-dns-server" target="_blank">Custom DNS server</a></li>
+                            <li><a href="https://github.com/ShashwatAgrawal20/tec.h" target="_blank">Minimal test engine in C</a></li>
+                            <li><a href="https://github.com/ShashwatAgrawal20/dotfiles" target="_blank">Dotfiles orchestration</a></li>
+                        </ul>
+                    </li>
+                    <li><strong>OSS Contributor @ Pandas</strong> — perf optimizations, bug fixes, and PDEP-4 docs</li>
+                </ul>
+            </section>
+
+            <section class="section">
+                <h2>Interests</h2>
+                <ul>
+                    <li>Systems programming, runtimes, and compilers</li>
+                    <li>Concurrency, I/O, and performance tuning</li>
+                    <li>Clean, minimal abstractions over raw power</li>
+                </ul>
+            </section>
+
+            <section class="section">
+                <blockquote>“Fast is better than fancy.”</blockquote>
+            </section>
         </div>
-        <div class="social-links">
-            <a href="https://github.com/ShashwatAgrawal20" target="_blank"><i class="fab fa-github"></i>GitHub</a>
-            <a href="https://linkedin.com/in/theshashwatagrawal" target="_blank"><i class="fab fa-linkedin"></i>LinkedIn</a>
-            <a href="https://x.com/theshashwat20" target="_blank"><i class="fab fa-x-twitter"></i>Twitter</a>
-            <a href="./Shashwat_Resume.pdf" target="_blank"><i class="fas fa-file-pdf"></i>Resume</a>
-        </div>
-    </div>
-</body>
+    </body>
 </html>
