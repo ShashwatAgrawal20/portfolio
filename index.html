@@ -5,130 +5,217 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>Shashwat Agrawal - Portfolio</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
         <style>
-            body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                min-height: 100vh;
-                background-color: #080819;
-                color: #f8f8f2;
-                box-sizing: border-box;
-            }
-            .container {
-                text-align: left;
-                max-width: 900px;
-                width: 100%;
-                padding: 20px;
-            }
-            h1, h2 {
-                color: #8be9fd;
-                margin-bottom: 0.3em;
-            }
-            p, li {
-                color: #f8f8f2;
-                font-size: 1.1em;
-                line-height: 1.6;
-            }
-            .tagline {
-                color: #bd93f9;
-                font-size: 1.3em;
-                margin-top: 0;
-                margin-bottom: 1.5em;
-            }
-            .social-links {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-            }
-            .social-links a {
-                color: #50fa7b;
-                text-decoration: none;
-                font-size: 1.3em;
-                padding: 8px 12px;
-                transition: all 0.3s ease;
-                display: flex;
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: #080819;
+            color: #f8f8f2;
+            box-sizing: border-box;
+        }
+        .container {
+            text-align: left;
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #8be9fd;
+            margin-bottom: 0.3em;
+        }
+        p, li {
+            color: #f8f8f2;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .tagline {
+            color: #bd93f9;
+            font-size: 1.3em;
+            margin-top: 0;
+            margin-bottom: 1.5em;
+        }
+        .social-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .social-links a {
+            color: #50fa7b;
+            text-decoration: none;
+            font-size: 1.3em;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            background-color: rgba(80, 250, 123, 0.1);
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+        .social-links a:hover {
+            color: #ff79c6;
+            background-color: rgba(255, 121, 198, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 6px rgba(255, 121, 198, 0.3);
+        }
+        .social-links i {
+            min-width: 16px;
+            text-align: center;
+        }
+        .section {
+            margin-top: 40px;
+        }
+        blockquote {
+            color: #6272a4;
+            font-style: italic;
+            border-left: 4px solid #44475a;
+            padding-left: 10px;
+            margin-left: 0;
+        }
+        a {
+            color: #50fa7b;
+            text-decoration: underline dotted;
+        }
+        a:hover {
+            color: #ff79c6;
+            text-decoration: underline solid;
+        }
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #44475a;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .header-left h1 {
+            font-size: 1.8em;
+            color: #8be9fd;
+            margin: 0;
+        }
+        .header-right {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .blog-post {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #44475a;
+        }
+
+        .blog-post h3 {
+            color: #ffb86c;
+            margin-top: 0;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .blog-post h3:hover {
+            color: #ff79c6;
+        }
+        .blog-post h3::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+            color: #6272a4;
+        }
+        .blog-post h3.expanded::after {
+            transform: rotate(-180deg);
+        }
+
+        .blog-post-meta {
+            font-size: 0.9em;
+            color: #6272a4;
+            margin-bottom: 15px;
+        }
+        .blog-post-meta a {
+            color: #6272a4;
+            text-decoration: underline dotted;
+        }
+        .blog-post-meta a:hover {
+            color: #ff79c6;
+        }
+
+        .blog-post-body {
+            margin-top: 15px;
+            display: none;
+            overflow: hidden;
+            padding-top: 15px;
+            border-top: 1px solid #44475a;
+        }
+        .blog-post-body.expanded {
+            display: block;
+        }
+
+        .blog-post-body p,
+        .blog-post-body li {
+            font-size: 1em;
+        }
+        .blog-post-body pre {
+            background-color: #282a36;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            color: #f8f8f2;
+            font-family: monospace;
+        }
+        .blog-post-body code {
+            background-color: #44475a;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .blog-post-body pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .blog-post-body img {
+            max-width: 100%;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 600px) {
+            .site-header {
+                flex-direction: column;
                 align-items: center;
-                background-color: rgba(80, 250, 123, 0.1);
-                border-radius: 6px;
-                white-space: nowrap;
-            }
-            .social-links a:hover {
-                color: #ff79c6;
-                background-color: rgba(255, 121, 198, 0.1);
-                transform: translateY(-2px);
-                box-shadow: 0 2px 6px rgba(255, 121, 198, 0.3);
-            }
-            .social-links i {
-                /* margin-right: 6px; */
-                min-width: 16px;
                 text-align: center;
             }
-            .section {
-                margin-top: 40px;
+            .tagline {
+                justify-content: center;
+                text-align: center;
             }
-            blockquote {
-                color: #6272a4;
-                font-style: italic;
-                border-left: 4px solid #44475a;
-                padding-left: 10px;
-                margin-left: 0;
-            }
-            a {
-                color: #50fa7b;
-                text-decoration: underline dotted;
-            }
-            a:hover {
-                color: #ff79c6;
-                text-decoration: underline solid;
-            }
-            .site-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                border-bottom: 1px solid #44475a;
-                padding-bottom: 10px;
-                margin-bottom: 30px;
-            }
-            .header-left h1 {
-                font-size: 1.8em;
-                color: #8be9fd;
-                margin: 0;
+            .header-left {
+                margin-bottom: 15px;
             }
             .header-right {
-                display: flex;
-                gap: 12px;
-                flex-wrap: wrap;
-                justify-content: flex-end;
+                justify-content: center;
+                gap: 1.5em;
             }
-
-            @media (max-width: 600px) {
-                .site-header {
-                    flex-direction: column;
-                    align-items: center;
-                    text-align: center;
-                }
-                .tagline {
-                    justify-content: center;
-                    text-align: center;
-                }
-                .header-left {
-                    margin-bottom: 15px;
-                }
-                .header-right {
-                    justify-content: center;
-                    gap: 1.5em;
-                }
-                .social-links a {
-                    font-size: 1.3em;
-                    padding: 6px 10px;
-                }
+            .social-links a {
+                font-size: 1.3em;
+                padding: 6px 10px;
             }
-    </style>
+        }
+        </style>
     </head>
     <body>
         <div class="container">
@@ -137,10 +224,11 @@
                     <h1>Shashwat Agrawal</h1>
                 </div>
                 <div class="header-right social-links">
-                    <a href="https://github.com/ShashwatAgrawal20" target="_blank"><i class="fab fa-github"></i></a>
-                    <a href="https://linkedin.com/in/theshashwatagrawal" target="_blank"><i class="fab fa-linkedin"></i></a>
-                    <a href="https://x.com/theshashwat20" target="_blank"><i class="fab fa-x-twitter"></i></a>
-                    <a href="./Shashwat_Resume.pdf" target="_blank"><i class="fas fa-file-pdf"></i></a>
+                    <a href="#blog-section" title="Blog"><i class="fas fa-book-open"></i></a>
+                    <a href="https://github.com/ShashwatAgrawal20" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="https://linkedin.com/in/theshashwatagrawal" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://x.com/theshashwat20" target="_blank" title="X/Twitter"><i class="fab fa-x-twitter"></i></a>
+                    <a href="./Shashwat_Resume.pdf" target="_blank" title="Resume"><i class="fas fa-file-pdf"></i></a>
                 </div>
             </header>
 
@@ -182,6 +270,75 @@
             <section class="section">
                 <blockquote>“Fast is better than fancy.”</blockquote>
             </section>
-        </div>
+
+            <section class="section" id="blog-section">
+                <h2>Blog</h2>
+                <div id="blog-posts-container">
+                    <p>Loading posts...</p>
+                </div>
+            </section>
+
+        </div> <script>
+        const USERNAME = 'ShashwatAgrawal20';
+        const REPO = 'blogs';
+        const POST_LABEL = 'blog-post';
+
+        async function loadBlogPosts() {
+            const issuesApiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/issues?labels=${POST_LABEL}&author:${USERNAME}&state=open&sort=created&direction=desc`;
+            const container = document.getElementById('blog-posts-container');
+            const converter = new showdown.Converter({ emoji: true });
+
+            try {
+                const response = await fetch(issuesApiUrl);
+                if (!response.ok) throw new Error(`Failed to fetch posts: ${response.statusText}`);
+                const posts = await response.json();
+
+                if (posts.length === 0) {
+                    container.innerHTML = '<p>No blog posts found.</p>';
+                    return;
+                }
+                container.innerHTML = '';
+
+                posts.forEach(post => {
+                    const postElement = document.createElement('article');
+                    postElement.classList.add('blog-post');
+
+                    const title = document.createElement('h3');
+                    title.textContent = post.title;
+
+                    const meta = document.createElement('div');
+                    meta.classList.add('blog-post-meta');
+                    const postDate = new Date(post.created_at).toLocaleString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                    meta.innerHTML = `
+                        Posted on ${postDate} •
+                        <a href="${post.html_url}" target="_blank">
+                            <i class="fas fa-comment"></i> Discuss on GitHub
+                        </a>
+                    `;
+
+                    const body = document.createElement('div');
+                    body.classList.add('blog-post-body');
+                    body.innerHTML = converter.makeHtml(post.body);
+
+                    title.addEventListener('click', () => {
+                        title.classList.toggle('expanded');
+                        body.classList.toggle('expanded');
+                    });
+
+                    postElement.appendChild(title);
+                    postElement.appendChild(meta);
+                    postElement.appendChild(body);
+                    container.appendChild(postElement);
+                });
+
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = '<p>Sorry, something went wrong while loading posts.</p>';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadBlogPosts);
+        </script>
     </body>
 </html>
