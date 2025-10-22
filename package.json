@@ -1,0 +1,16 @@
+{
+  "name": "portfolio-blog-builder",
+  "version": "1.0.0",
+  "description": "Static blog generator from GitHub issues",
+  "private": true,
+  "scripts": {
+    "build": "node build-blog.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.7.0",
+    "showdown": "^2.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}

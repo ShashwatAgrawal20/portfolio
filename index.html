@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>Shashwat Agrawal - Portfolio</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
         <style>
         html {
             scroll-behavior: smooth;
@@ -115,33 +114,25 @@
             border-radius: 8px;
             margin-bottom: 20px;
             border: 1px solid #44475a;
+            transition: border-color 0.3s ease;
         }
-
+        .blog-post:hover {
+            border-color: #6272a4;
+        }
         .blog-post h3 {
             color: #ffb86c;
             margin-top: 0;
             font-size: 1.5em;
-            cursor: pointer;
-            transition: color 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 10px;
         }
-        .blog-post h3:hover {
+        .blog-post h3 a {
+            color: #ffb86c;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .blog-post h3 a:hover {
             color: #ff79c6;
         }
-        .blog-post h3::after {
-            content: '\f078';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            font-size: 0.8em;
-            transition: transform 0.3s ease;
-            color: #6272a4;
-        }
-        .blog-post h3.expanded::after {
-            transform: rotate(-180deg);
-        }
-
         .blog-post-meta {
             font-size: 0.9em;
             color: #6272a4;
@@ -154,43 +145,18 @@
         .blog-post-meta a:hover {
             color: #ff79c6;
         }
-
-        .blog-post-body {
-            margin-top: 15px;
-            display: none;
-            overflow: hidden;
-            padding-top: 15px;
-            border-top: 1px solid #44475a;
+        .read-more {
+            color: #50fa7b;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
         }
-        .blog-post-body.expanded {
-            display: block;
-        }
-
-        .blog-post-body p,
-        .blog-post-body li {
-            font-size: 1em;
-        }
-        .blog-post-body pre {
-            background-color: #282a36;
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            color: #f8f8f2;
-            font-family: monospace;
-        }
-        .blog-post-body code {
-            background-color: #44475a;
-            padding: 3px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        .blog-post-body pre code {
-            background-color: transparent;
-            padding: 0;
-        }
-        .blog-post-body img {
-            max-width: 100%;
-            border-radius: 6px;
+        .read-more:hover {
+            color: #ff79c6;
+            gap: 8px;
         }
 
         @media (max-width: 600px) {
@@ -268,7 +234,7 @@
             </section>
 
             <section class="section">
-                <blockquote>“Fast is better than fancy.”</blockquote>
+                <blockquote>"Fast is better than fancy."</blockquote>
             </section>
 
             <section class="section" id="blog-section">
@@ -278,66 +244,58 @@
                 </div>
             </section>
 
-        </div> <script>
-        const USERNAME = 'ShashwatAgrawal20';
-        const REPO = 'blogs';
-        const POST_LABEL = 'blog-post';
-
+        </div>
+        <script>
         async function loadBlogPosts() {
-            const issuesApiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/issues?labels=${POST_LABEL}&author:${USERNAME}&state=open&sort=created&direction=desc`;
             const container = document.getElementById('blog-posts-container');
-            const converter = new showdown.Converter({ emoji: true });
 
             try {
-                const response = await fetch(issuesApiUrl);
-                if (!response.ok) throw new Error(`Failed to fetch posts: ${response.statusText}`);
+                const response = await fetch('blog-posts.json');
+                if (!response.ok) throw new Error('Failed to load posts');
                 const posts = await response.json();
 
                 if (posts.length === 0) {
-                    container.innerHTML = '<p>No blog posts found.</p>';
+                    container.innerHTML = '<p>No blog posts yet.</p>';
                     return;
                 }
+
                 container.innerHTML = '';
 
                 posts.forEach(post => {
                     const postElement = document.createElement('article');
                     postElement.classList.add('blog-post');
 
-                    const title = document.createElement('h3');
-                    title.textContent = post.title;
-
-                    const meta = document.createElement('div');
-                    meta.classList.add('blog-post-meta');
-                    const postDate = new Date(post.created_at).toLocaleString('en-US', {
+                    const postDate = new Date(post.date).toLocaleString('en-US', {
                         year: 'numeric', month: 'long', day: 'numeric'
                     });
-                    meta.innerHTML = `
-                        Posted on ${postDate} •
-                        <a href="${post.html_url}" target="_blank">
-                            <i class="fas fa-comment"></i> Discuss on GitHub
+
+                    postElement.innerHTML = `
+                        <h3><a href="${post.url}">${escapeHtml(post.title)}</a></h3>
+                        <div class="blog-post-meta">
+                            Posted on ${postDate} •
+                            <a href="${post.githubUrl}" target="_blank">
+                                <i class="fas fa-comment"></i> Discuss on GitHub
+                            </a>
+                        </div>
+                        <a href="${post.url}" class="read-more">
+                            Read full post <i class="fas fa-arrow-right"></i>
                         </a>
-                    `;
-
-                    const body = document.createElement('div');
-                    body.classList.add('blog-post-body');
-                    body.innerHTML = converter.makeHtml(post.body);
-
-                    title.addEventListener('click', () => {
-                        title.classList.toggle('expanded');
-                        body.classList.toggle('expanded');
-                    });
-
-                    postElement.appendChild(title);
-                    postElement.appendChild(meta);
-                    postElement.appendChild(body);
-                    container.appendChild(postElement);
+                        `;
+                        container.appendChild(postElement);
                 });
 
             } catch (error) {
                 console.error(error);
-                container.innerHTML = '<p>Sorry, something went wrong while loading posts.</p>';
+                container.innerHTML = '<p>No blog posts yet.</p>';
             }
         }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         document.addEventListener('DOMContentLoaded', loadBlogPosts);
         </script>
     </body>
