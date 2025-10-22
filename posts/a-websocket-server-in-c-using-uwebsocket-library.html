@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            A WebSocket Server in C++ using uWebSocket library. - Shashwat
+            Agrawal
+        </title>
+        <meta
+            name="description"
+            content="A WebSocket Server in C++ using uWebSocket library."
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        />
+        <style>
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                margin: 0;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+                min-height: 100vh;
+                background-color: #080819;
+                color: #f8f8f2;
+                line-height: 1.6;
+            }
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .back-link {
+                color: #50fa7b;
+                text-decoration: none;
+                font-size: 1.1em;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+            .back-link:hover {
+                color: #ff79c6;
+            }
+            h1 {
+                color: #8be9fd;
+                margin-bottom: 0.3em;
+                font-size: 2em;
+            }
+            .post-meta {
+                color: #6272a4;
+                margin-bottom: 30px;
+                font-size: 0.95em;
+            }
+            .post-meta a {
+                color: #6272a4;
+                text-decoration: underline dotted;
+            }
+            .post-meta a:hover {
+                color: #ff79c6;
+            }
+            .post-content {
+                color: #f8f8f2;
+                font-size: 1.1em;
+            }
+            .post-content p {
+                margin: 1em 0;
+            }
+            .post-content a {
+                color: #50fa7b;
+                text-decoration: underline dotted;
+            }
+            .post-content a:hover {
+                color: #ff79c6;
+                text-decoration: underline solid;
+            }
+            .post-content pre {
+                background-color: #282a36;
+                padding: 15px;
+                border-radius: 6px;
+                overflow-x: auto;
+                color: #f8f8f2;
+            }
+            .post-content code {
+                background-color: #4447a;
+                padding: 3px 6px;
+                border-radius: 4px;
+                font-family: monospace;
+            }
+            .post-content pre code {
+                background-color: transparent;
+                padding: 0;
+            }
+            .post-content img {
+                max-width: 100%;
+                border-radius: 6px;
+            }
+            .post-content blockquote {
+                color: #6272a4;
+                font-style: italic;
+                border-left: 4px solid #44475a;
+                padding-left: 15px;
+                margin-left: 0;
+            }
+            .post-content h2,
+            .post-content h3,
+            .post-content h4 {
+                color: #ffb86c;
+                margin-top: 1.5em;
+            }
+            .post-content ul,
+            .post-content ol {
+                padding-left: 2em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <a href="../index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Portfolio
+            </a>
+
+            <article>
+                <h1>A WebSocket Server in C++ using uWebSocket library.</h1>
+
+                <div class="post-meta">
+                    Posted on October 22, 2025 •
+                    <a
+                        href="https://github.com/ShashwatAgrawal20/portfolio/issues/1"
+                        target="_blank"
+                    >
+                        <i class="fas fa-comment"></i> Discuss on GitHub
+                    </a>
+                </div>
+
+                <div class="post-content">
+                    <ol>
+                        <li>
+                            You might be asking why write backend services in
+                            C++ and not ja*ascrip
+                        </li>
+                    </ol>
+                    <blockquote>
+                        <p>cause we fucking can and we fucking will.</p>
+                    </blockquote>
+                    <p>THIS SHIT FUCKING WORKS</p>
+                    <div align="center">
+                        <img
+                            src="https://raw.githubusercontent.com/uNetworking/uWebSockets/master/misc/logo.svg"
+                            height="180"
+                        /><br />
+                        <i>Simple, secure</i
+                        ><sup
+                            ><a
+                                href="https://github.com/uNetworking/uWebSockets/tree/master/fuzzing#fuzz-testing-of-various-parsers-and-mocked-examples"
+                                >1</a
+                            ></sup
+                        ><i> & standards compliant</i
+                        ><sup
+                            ><a
+                                href="https://unetworking.github.io/uWebSockets.js/report.pdf"
+                                >2</a
+                            ></sup
+                        ><i> web server for the most demanding</i
+                        ><sup
+                            ><a
+                                href="https://github.com/uNetworking/uWebSockets/tree/master/benchmarks#benchmark-driven-development"
+                                >3</a
+                            ></sup
+                        ><i> of applications.</i>
+                        <a
+                            href="https://github.com/uNetworking/uWebSockets/blob/master/misc/READMORE.md"
+                            >Read more...</a
+                        >
+                        <br /><br />
+
+                        <a
+                            href="https://github.com/uNetworking/uWebSockets/releases"
+                            ><img
+                                src="https://img.shields.io/github/v/release/uNetworking/uWebSockets"
+                        /></a>
+                        <a
+                            href="https://osv.dev/list?q=uwebsockets&affected_only=true&page=1&ecosystem=OSS-Fuzz"
+                            ><img
+                                src="https://oss-fuzz-build-logs.storage.googleapis.com/badges/uwebsockets.svg"
+                        /></a>
+                        <img
+                            src="https://img.shields.io/badge/est.-2016-green"
+                        />
+                    </div>
+                    <p><br /><br /></p>
+                    <h3 id="closed_lock_with_keyoptimizedsecurity">
+                        🔐 Optimized security
+                    </h3>
+                    <p>
+                        Being meticulously optimized for speed and memory
+                        footprint, µWebSockets is fast enough to do encrypted
+                        TLS 1.3 messaging quicker than most alternative servers
+                        can do even unencrypted, cleartext messaging<sup
+                            ><a
+                                href="https://github.com/uNetworking/uWebSockets/tree/master/benchmarks#benchmark-driven-development"
+                                >3</a
+                            ></sup
+                        >.
+                    </p>
+                    <p>
+                        Furthermore, we partake in Google's OSS-Fuzz with a ~95%
+                        daily fuzzing coverage<sup
+                            ><a
+                                href="https://github.com/uNetworking/uWebSockets/blob/master/misc/Screenshot_20210915-004009.png?raw=true"
+                                >4</a
+                            ></sup
+                        >
+                        with no sanitizer issues. LGTM scores us flawless A+
+                        from having zero CodeQL alerts and we compile with
+                        pedantic warning levels.
+                    </p>
+                    <h3 id="arrow_forwardrapidscripting">▶️ Rapid scripting</h3>
+                    <p>
+                        µWebSockets is written entirely in C &amp; C++ but has a
+                        seamless integration for Node.js backends. This allows
+                        for rapid scripting of powerful apps, using widespread
+                        competence. See
+                        <a href="https://github.com/uNetworking/uWebSockets.js"
+                            >µWebSockets.js</a
+                        >.
+                    </p>
+                    <h3 id="crossed_swordsbattleproven">⚔️ Battle proven</h3>
+                    <p>
+                        We've been fully standards compliant with a perfect
+                        Autobahn|Testsuite score since 2016<sup
+                            ><a
+                                href="https://unetworking.github.io/uWebSockets.js/report.pdf"
+                                >2</a
+                            ></sup
+                        >. µWebSockets powers many of the biggest crypto
+                        exchanges in the world, handling trade volumes of
+                        multiple billions of USD every day. If you trade crypto,
+                        chances are you do so via µWebSockets.
+                    </p>
+                    <h3 id="batterybatteriesincluded">🔋 Batteries included</h3>
+                    <p>
+                        Designed around a convenient URL router with wildcard
+                        &amp; parameter support - paired with efficient pub/sub
+                        features for WebSockets. µWebSockets should be the
+                        obvious, complete starting point for any real-time web
+                        project with high demands.
+                    </p>
+                    <p>
+                        Start building your Http &amp; WebSocket apps in no
+                        time;
+                        <a
+                            href="https://github.com/uNetworking/uWebSockets/blob/master/misc/READMORE.md"
+                            >read the user manual</a
+                        >
+                        and
+                        <a
+                            href="https://github.com/uNetworking/uWebSockets/tree/master/examples"
+                            >see examples</a
+                        >. You can browse our
+                        <a
+                            href="https://unetworking.github.io/uWebSockets.js/generated/"
+                            >TypeDoc</a
+                        >
+                        for a quick overview.
+                    </p>
+                    <pre><code class="c++ language-c++">/* One app per thread; spawn as many as you have CPU-cores and let uWS share the listening port */
+uWS::SSLApp({
+
+    /* These are the most common options, fullchain and key. See uSockets for more options. */
+    .cert_file_name = "cert.pem",
+    .key_file_name = "key.pem"
+
+}).get("/hello/:name", [](auto *res, auto *req) {
+
+    /* You can efficiently stream huge files too */
+    res-&gt;writeStatus("200 OK")
+       -&gt;writeHeader("Content-Type", "text/html; charset=utf-8")
+       -&gt;write("&lt;h1&gt;Hello ")
+       -&gt;write(req-&gt;getParameter("name"))
+       -&gt;end("!&lt;/h1&gt;");
+
+}).ws&lt;UserData&gt;("/*", {
+
+    /* Just a few of the available handlers */
+    .open = [](auto *ws) {
+        ws-&gt;subscribe("oh_interesting_subject");
+    },
+    .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
+        ws-&gt;send(message, opCode);
+    }
+
+}).listen(9001, [](auto *listenSocket) {
+
+    if (listenSocket) {
+        std::cout &lt;&lt; "Listening on port " &lt;&lt; 9001 &lt;&lt; std::endl;
+    } else {
+        std::cout &lt;&lt; "Failed to load certs or to bind to port" &lt;&lt; std::endl;
+    }
+
+}).run();
+</code></pre>
+                    <h3 id="briefcasecommerciallysupported">
+                        💼 Commercially supported
+                    </h3>
+                    <p>
+                        <a href="https://github.com/uNetworking"
+                            >uNetworking AB</a
+                        >
+                        is a Swedish consulting &amp; contracting company
+                        dealing with anything related to µWebSockets;
+                        development, support and customer success.
+                    </p>
+                    <p>
+                        Don't hesitate
+                        <a href="mailto:alexhultman@gmail.com"
+                            >sending a mail</a
+                        >
+                        if you're building something large, in need of advice or
+                        having other business inquiries in mind. We'll figure
+                        out what's best for both parties and make sure you're
+                        not falling into common pitfalls.
+                    </p>
+                    <p>
+                        Special thanks to BitMEX, Bitfinex, Google, Coinbase,
+                        Bitwyre, AppDrag and deepstreamHub for allowing the
+                        project itself to thrive on GitHub since 2016 - this
+                        project would not be possible without these beautiful
+                        companies.
+                    </p>
+                </div>
+            </article>
+        </div>
+    </body>
+</html>
