@@ -37,140 +37,51 @@ function generatePostHTML(post) {
         day: 'numeric',
     });
 
-    return `<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${escapeHtml(post.title)} - Shashwat Agrawal</title>
-        <meta name="description" content="${escapeHtml(post.title)}" />
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-        />
-        <style>
-            html {
-                scroll-behavior: smooth;
-            }
-            body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                min-height: 100vh;
-                background-color: #080819;
-                color: #f8f8f2;
-                line-height: 1.6;
-            }
-            .container {
-                max-width: 900px;
-                margin: 0 auto;
-                padding: 20px;
-            }
-            .back-link {
-                color: #50fa7b;
-                text-decoration: none;
-                font-size: 1.1em;
-                margin-bottom: 20px;
-                display: inline-block;
-            }
-            .back-link:hover {
-                color: #ff79c6;
-            }
-            h1 {
-                color: #8be9fd;
-                margin-bottom: 0.3em;
-                font-size: 2em;
-            }
-            .post-meta {
-                color: #6272a4;
-                margin-bottom: 30px;
-                font-size: 0.95em;
-            }
-            .post-meta a {
-                color: #6272a4;
-                text-decoration: underline dotted;
-            }
-            .post-meta a:hover {
-                color: #ff79c6;
-            }
-            .post-content {
-                color: #f8f8f2;
-                font-size: 1.1em;
-            }
-            .post-content p {
-                margin: 1em 0;
-            }
-            .post-content a {
-                color: #50fa7b;
-                text-decoration: underline dotted;
-            }
-            .post-content a:hover {
-                color: #ff79c6;
-                text-decoration: underline solid;
-            }
-            .post-content pre {
-                background-color: #282a36;
-                padding: 15px;
-                border-radius: 6px;
-                overflow-x: auto;
-                color: #f8f8f2;
-            }
-            .post-content code {
-                background-color: #4447a;
-                padding: 3px 6px;
-                border-radius: 4px;
-                font-family: monospace;
-            }
-            .post-content pre code {
-                background-color: transparent;
-                padding: 0;
-            }
-            .post-content img {
-                max-width: 100%;
-                border-radius: 6px;
-            }
-            .post-content blockquote {
-                color: #6272a4;
-                font-style: italic;
-                border-left: 4px solid #44475a;
-                padding-left: 15px;
-                margin-left: 0;
-            }
-            .post-content h2,
-            .post-content h3,
-            .post-content h4 {
-                color: #ffb86c;
-                margin-top: 1.5em;
-            }
-            .post-content ul,
-            .post-content ol {
-                padding-left: 2em;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <a href="../index.html" class="back-link">
-                <i class="fas fa-arrow-left"></i> Back to Portfolio
-            </a>
+    return `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>${escapeHtml(post.title)} - Shashwat Agrawal</title>
 
-            <article>
-                <h1>${escapeHtml(post.title)}</h1>
+            <meta name="description" content="${escapeHtml(post.title)}" />
 
-                <div class="post-meta">
-                    Posted on ${postDate} •
-                    <a href="${post.html_url}" target="_blank">
-                        <i class="fas fa-comment"></i> Discuss on GitHub
-                    </a>
-                </div>
+            <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+            <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+            <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+            <link rel="manifest" href="../site.webmanifest">
+            <link rel="stylesheet" href="../style.css" />
 
-                <div class="post-content">
-                    ${htmlContent}
-                </div>
-            </article>
-        </div>
-    </body>
-</html>`;
+            <link
+                rel="stylesheet"
+                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+            />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/tokyo-night-dark.min.css">
+            </head>
+        <body>
+            <div class="container">
+                <a href="../index.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Portfolio
+                </a>
+
+                <article>
+                    <h1>${escapeHtml(post.title)}</h1>
+                    <div class="post-meta">
+                        Posted on ${postDate} •
+                        <a href="${post.html_url}" target="_blank">
+                            <i class="fas fa-comment"></i> Discuss on GitHub
+                        </a>
+                    </div>
+                    <div class="post-content">
+                        ${htmlContent}
+                    </div>
+                </article>
+            </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        </body>
+        </html>`;
 }
 
 function escapeHtml(text) {
