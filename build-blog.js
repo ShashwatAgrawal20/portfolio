@@ -98,6 +98,10 @@ function generatePostHTML(post) {
         month: "long",
         day: "numeric",
     });
+    const needsCMake = post.body.includes("```cmake");
+    const cmakeScriptTag = needsCMake
+        ? `<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/cmake.min.js"></script>`
+        : "";
 
     return `
     <!DOCTYPE html>
@@ -141,6 +145,7 @@ function generatePostHTML(post) {
             </article>
         </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    ${cmakeScriptTag}
     <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
     <script>
         hljs.highlightAll();
