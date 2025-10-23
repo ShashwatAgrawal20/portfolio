@@ -11,8 +11,8 @@ on:
 jobs:
   build:
     if: |
-      github.event.action == 'workflow_dispatch' ||
-      github.event.action == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
       (github.event.issue && contains(github.event.issue.labels.*.name, 'blog-post'))
 
     runs-on: ubuntu-latest
