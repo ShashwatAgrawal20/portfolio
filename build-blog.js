@@ -10,7 +10,21 @@ const POST_LABEL = "blog-post";
 const POSTS_DIR = path.join(__dirname, "posts");
 const JSON_PATH = path.join(__dirname, "blog-posts.json");
 
-const converter = new showdown.Converter({ emoji: true });
+const converter = new showdown.Converter({
+    ghCompatibleHeaderId: true,
+    tables: true,
+    ghCodeBlocks: true,
+    tasklists: true,
+    strikethrough: true,
+
+    simpleLineBreaks: true,
+    literalMidWordUnderscores: true,
+    simplifiedAutoLink: true,
+    emoji: true,
+
+    parseImgDimensions: true,
+    excludeTrailingPunctuationFromURLs: true
+});
 
 async function fetchBlogPosts() {
     console.log("Fetching all blog posts...");
@@ -103,6 +117,10 @@ function generatePostHTML(post) {
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
         />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/tokyo-night-dark.min.css">
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css"
+        />
         </head>
     <body>
         <div class="container">
@@ -123,7 +141,15 @@ function generatePostHTML(post) {
             </article>
         </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        hljs.addPlugin(
+          new CopyButtonPlugin({
+            autohide: false,
+          })
+        );
+    </script>
     </body>
     </html>`;
 }
