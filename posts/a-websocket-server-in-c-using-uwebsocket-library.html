@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            A WebSocket Server in C++ using uWebSocket library. - Shashwat
+            Agrawal
+        </title>
+        <meta
+            name="description"
+            content="A WebSocket Server in C++ using uWebSocket library."
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="../apple-touch-icon.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="../favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="../favicon-16x16.png"
+        />
+        <link rel="manifest" href="../site.webmanifest" />
+        <link rel="stylesheet" href="../style.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/tokyo-night-dark.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css"
+        />
+    </head>
+    <body>
+        <div class="container">
+            <a href="../index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Portfolio
+            </a>
+            <article>
+                <h1>A WebSocket Server in C++ using uWebSocket library.</h1>
+                <div class="post-meta">
+                    Posted on October 22, 2025 •
+                    <a
+                        href="https://github.com/ShashwatAgrawal20/portfolio/issues/1"
+                        target="_blank"
+                    >
+                        <i class="fas fa-comment"></i> Discuss on GitHub
+                    </a>
+                </div>
+                <div class="post-content">
+                    <blockquote>
+                        <p>
+                            "Why the fuck would I write a backend service in C++
+                            and not glorious JavaScript?"
+                        </p>
+                    </blockquote>
+                    <p>Because we can. And we will.</p>
+                    <h2 id="table-of-contents">Table of Contents</h2>
+                    <ol>
+                        <li>
+                            <a href="#why-c-for-backend-services"
+                                >Why C++ for Backend Services</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#what-makes-µwebsockets-legendary"
+                                >What Makes µWebSockets Legendary</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#part-1-the-build-that-works"
+                                >Part 1: The Build That Works</a
+                            >
+                            <ul>
+                                <li>
+                                    <a
+                                        href="#installing-µwebsockets-as-a-git-submodule"
+                                        >Installing µWebSockets as a Git
+                                        Submodule</a
+                                    >
+                                </li>
+                                <li>
+                                    <a
+                                        href="#cmake-setup-the-part-everyone-fucks-up"
+                                        >CMake Setup: The Part Everyone Fucks
+                                        Up</a
+                                    >
+                                    <ul>
+                                        <li>
+                                            <a href="#building-the-library"
+                                                >Building the Library</a
+                                            >
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a
+                                        href="#ssl-certificates-because-security-matters"
+                                        >SSL Certificates: Because Security
+                                        Matters</a
+                                    >
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#part-2-the-code">Part 2: The Code</a>
+                            <ul>
+                                <li>
+                                    <a href="#step-1-the-header-file"
+                                        >Step 1: The Header File</a
+                                    >
+                                </li>
+                                <li>
+                                    <a href="#step-2-the-implementation"
+                                        >Step 2: The Implementation</a
+                                    >
+                                    <ul>
+                                        <li>
+                                            <a href="#breaking-it-down"
+                                                >Breaking It Down</a
+                                            >
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#step-3-the-entry-point"
+                                        >Step 3: The Entry Point</a
+                                    >
+                                </li>
+                                <li>
+                                    <a href="#step-4-build-and-run"
+                                        >Step 4: Build and Run</a
+                                    >
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#step-5-testing-your-websocket-server"
+                                >Step 5: Testing Your WebSocket Server</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="#lessons-learned-aka-things-that-made-me-question-my-life-choices"
+                                >Lessons Learned (aka: Things That Made Me
+                                Question My Life Choices)</a
+                            >
+                        </li>
+                        <li><a href="#wrapping-up">Wrapping Up</a></li>
+                    </ol>
+                    <h2 id="why-c-for-backend-services">
+                        Why C++ for Backend Services?
+                    </h2>
+                    <p>
+                        <strong
+                            >Again, Because we fucking can. And we fucking
+                            will.</strong
+                        >
+                    </p>
+                    <p>
+                        We're not building another Todo app. We're not "moving
+                        JSON from one box to another." We're building systems
+                        that handle millions of concurrent connections, where
+                        every nanosecond and every byte of RAM counts. We're
+                        building the shit that financial exchanges, AAA game
+                        servers, and high-frequency trading bots run on.
+                    </p>
+                    <p>
+                        When you need that kind of raw, unadulterated,
+                        "melt-your-CPU-in-a-good-way" performance, you don't
+                        reach for a tool built for animating browser buttons.
+                    </p>
+                    <p>
+                        <a href="https://github.com/uNetworking/uWebSockets"
+                            >µWebSockets</a
+                        >
+                        isn't just fast – it's so fast it does encrypted TLS 1.3
+                        messaging quicker than most servers can handle
+                        unencrypted traffic.<br />
+                        Read that again.
+                    </p>
+                    <h2 id="what-makes-µwebsockets-legendary">
+                        What Makes µWebSockets Legendary?
+                    </h2>
+                    <p>
+                        This isn't your typical "look ma, I made a server"
+                        library. µWebSockets powers some of the biggest crypto
+                        exchanges in the world, handling billions of USD in
+                        trades every single day. When you trade crypto, there's
+                        a good chance you're doing it through µWebSockets and
+                        don't even know it.
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Battle-tested since 2016</strong> – Perfect
+                            Autobahn|Testsuite compliance
+                        </li>
+                        <li>
+                            <strong>95% daily fuzzing coverage</strong> –
+                            Google's OSS-Fuzz, zero sanitizer issues
+                        </li>
+                        <li>
+                            <strong>LGTM score: A+</strong> – Zero CodeQL alerts
+                        </li>
+                        <li>
+                            <strong>Trusted by the big boys</strong> – BitMEX,
+                            Bitfinex, Coinbase, and the exchanges that move
+                            billions daily
+                        </li>
+                    </ul>
+                    <h2 id="part-1-the-build-that-works">
+                        Part 1: The Build that Works
+                    </h2>
+                    <h3 id="installing-µwebsockets-as-a-git-submodule">
+                        Installing µWebSockets as a git submodule
+                    </h3>
+                    <blockquote>
+                        <p>
+                            This is not Ja*aScript, it's c++ have to build your
+                            own stuff. This is what separates us from the js
+                            andies.
+                        </p>
+                    </blockquote>
+                    <p>
+                        First, we get our dependencies.
+                        <code>uWebSockets</code> as a git submodule.
+                    </p>
+                    <blockquote>
+                        <p>
+                            [!NOTE]<br />
+                            you need to have a git repo initialized for this.
+                        </p>
+                    </blockquote>
+                    <p>
+                        This might take a while depending on your internet
+                        connection.
+                    </p>
+                    <pre><code class="bash language-bash"># Add µWebSockets as a submodule
+git submodule add https://github.com/uNetworking/uWebSockets.git external/uwebsockets
+git submodule update --init --recursive
+</code></pre>
+                    <h3 id="cmake-setup-the-part-everyone-fucks-up">
+                        CMake Setup: The Part Everyone Fucks Up
+                    </h3>
+                    <blockquote>
+                        <p>
+                            You Thought You Could Just 'cmake .'? That's Fucking
+                            Adorable.<br />
+                            Your dependencies don't give a shit about your
+                            feelings. They don't use your build system.
+                        </p>
+                    </blockquote>
+                    <p>
+                        <strong
+                            >The Problem Most Tutorials Don't Tell You</strong
+                        ><br />
+                        µWebSockets depends on uSockets – the underlying I/O
+                        layer that makes everything fast. uSockets has its own
+                        Makefile, and it works perfectly.
+                    </p>
+                    <p>The Secret Sauce: Let uSockets Build Itself</p>
+                    <pre><code class="cmake language-cmake">cmake_minimum_required(VERSION 3.20)
+project(WebSocketServer CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(TARGET_NAME websocket_server)
+
+# ============================================
+# Find System Dependencies
+# ============================================
+find_package(OpenSSL REQUIRED)
+find_package(ZLIB REQUIRED)
+
+# ============================================
+# Build uSockets (The Secret Sauce)
+# ============================================
+set(USOCKETS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/uwebsockets/uSockets)
+set(USOCKETS_LIBRARY ${USOCKETS_SOURCE_DIR}/uSockets.a)
+
+# Build uSockets using its own Makefile with OpenSSL support
+add_custom_command(
+    OUTPUT ${USOCKETS_LIBRARY}
+    COMMAND ${CMAKE_MAKE_PROGRAM} WITH_OPENSSL=1 -C ${USOCKETS_SOURCE_DIR}
+    COMMENT "Building uSockets library with OpenSSL support"
+)
+
+add_custom_target(build_usockets ALL DEPENDS ${USOCKETS_LIBRARY})
+
+# Import uSockets as a CMake library
+add_library(uSockets STATIC IMPORTED)
+set_target_properties(uSockets PROPERTIES
+    IMPORTED_LOCATION "${USOCKETS_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${USOCKETS_SOURCE_DIR}/src"
+)
+add_dependencies(uSockets build_usockets)
+
+# ============================================
+# Create µWebSockets Interface Library
+# ============================================
+add_library(uWebSockets_Interface INTERFACE)
+
+target_include_directories(uWebSockets_Interface INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(uWebSockets_Interface INTERFACE
+    uSockets
+    ZLIB::ZLIB
+    OpenSSL::SSL
+    OpenSSL::Crypto
+)
+
+# ============================================
+# Build Your Application
+# ============================================
+file(GLOB TARGET_SOURCES "src/*.cpp")
+list(FILTER TARGET_SOURCES EXCLUDE REGEX ".*/main\\.cpp$")
+
+add_library(app_lib STATIC ${TARGET_SOURCES})
+target_link_libraries(app_lib PUBLIC uWebSockets_Interface)
+target_include_directories(app_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_dependencies(app_lib build_usockets)
+
+add_executable(${TARGET_NAME} src/main.cpp)
+target_link_libraries(${TARGET_NAME} PRIVATE app_lib)
+
+# Compiler warnings (because we're professionals)
+if(MSVC)
+    target_compile_options(${TARGET_NAME} PRIVATE /W4 /WX)
+else()
+    target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+</code></pre>
+                    <h4 id="building-the-library">Building the Library</h4>
+                    <p>
+                        <strong
+                            >BEFORE YOU RUN THIS BUILD COMMAND YOU NEED TO HAVE
+                            A <code>src/main.cpp</code> AND
+                            <code>src/WebSocketServer.cpp</code> FILE</strong
+                        >
+                    </p>
+                    <p>
+                        The <code>src/WebSocketServer.cpp</code> file can even
+                        be empty. And you can have a minimal program like this
+                        in your <code>src/main.cpp</code>:
+                    </p>
+                    <pre><code class="cpp language-cpp">int main() {
+    return 0;
+}
+</code></pre>
+                    <p>
+                        Don't worry, we'll write the actual code later. This is
+                        just to test that CMake works.
+                    </p>
+                    <blockquote>
+                        <p>
+                            <strong>Note:</strong> Not sure if this shit will
+                            work on Windows due to those glob patterns in
+                            CMake.<br />
+                            If you're on Windows and hit issues, you might need
+                            to explicitly list your source files<br />
+                            instead of using <code>file(GLOB ...)</code>. But
+                            that's a Windows problem, not a you problem.
+                        </p>
+                    </blockquote>
+                    <p><strong>Create the basic structure:</strong></p>
+                    <pre><code class="bash language-bash">mkdir -p include src certs
+touch src/main.cpp src/WebSocketServer.cpp
+</code></pre>
+                    <p>
+                        Your directory structure should look something like this
+                        now:
+                    </p>
+                    <pre><code class="bash language-bash">.
+├── certs
+├── CMakeLists.txt
+├── external
+│&amp;nbsp;&amp;nbsp; └── uwebsockets        # created by git submodule
+├── include
+└── src
+    ├── main.cpp
+    └── WebSocketServer.cpp
+
+6 directories, 3 files
+</code></pre>
+                    <p>Run this in the root of your project:</p>
+                    <pre><code class="bash language-bash">cmake -S . -B build
+cd build &amp;&amp; make
+</code></pre>
+                    <p>
+                        At this point, you might be thinking "great, it works!"
+                        and you'd be right. It does work. It works
+                        beautifully.<br />
+                        <strong>Until you try to add SSL.</strong>
+                    </p>
+                    <hr />
+                    <h3 id="ssl-certificates-because-security-matters">
+                        SSL Certificates: Because Security Matters
+                    </h3>
+                    <p>
+                        We're using <code>wss://</code> (Secure WebSockets), not
+                        that unencrypted peasant shit. For local development,
+                        self-signed certificates work fine.
+                    </p>
+                    <pre><code class="bash language-bash"># Generate self-signed certificate (valid for 365 days)
+openssl req -x509 -sha256 -newkey rsa:2048 \
+    -keyout certs/key.pem \
+    -out certs/cert.pem \
+    -days 365 -nodes \
+    -subj "/C=IN/O=MY ORG./CN=localhost" \
+    -addext "subjectAltName = DNS:localhost"
+</code></pre>
+                    <h2 id="part-2-the-code">Part 2: The Code</h2>
+                    <p>
+                        Now that we've got our build system unfucked, it's time
+                        to write the actual server. We're keeping this clean,
+                        and simple.
+                    </p>
+                    <blockquote>
+                        <p>
+                            NOTE: we're not going to write a 5000 lines code,
+                            we'll be keeping things fairly straight forward to
+                            understand.
+                        </p>
+                        <ul>
+                            <li>
+                                A WebSocket server class (one header, one
+                                implementation)
+                            </li>
+                            <li>Event handlers that make sense</li>
+                            <li>A main function that just works</li>
+                            <li>That's it. No bullshit.</li>
+                        </ul>
+                    </blockquote>
+                    <h3 id="step-1-the-header-file">Step 1: The Header File</h3>
+                    <p>
+                        <strong
+                            ><code>include/WebSocketServer.hpp</code></strong
+                        >
+                    </p>
+                    <pre><code class="cpp language-cpp">#pragma once
+#include "external/uwebsockets/src/App.h"
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+
+class WebSocketServer {
+  public:
+    explicit WebSocketServer(int port, const std::string &amp;key_file,
+                             const std::string &amp;cert_file);
+
+    // Run the server (this blocks until shutdown)
+    void run();
+
+  private:
+    // Per-connection data - store whatever you need here
+    struct SocketData {
+        std::string user_id;
+        uint64_t connected_at;
+    };
+
+    // Type aliases to keep our sanity
+    constexpr static bool IS_USING_SSL = true;
+    constexpr static bool IS_SERVER = true;
+    using WebSocket = uWS::WebSocket&lt;IS_USING_SSL, IS_SERVER, SocketData&gt;;
+
+    // The lifecycle callbacks
+    void setup_routes();
+    void on_listen(us_listen_socket_t *listen_socket);
+    void on_open(WebSocket *ws);
+    void on_message(WebSocket *ws, std::string_view message,
+                    uWS::OpCode op_code);
+    void on_close(WebSocket *ws, int code, std::string_view message);
+
+    // Member variables
+    std::string key_file_;
+    std::string cert_file_;
+    uWS::SSLApp app_;
+    int port_;
+};
+</code></pre>
+                    <p>
+                        This is our main server class. We're wrapping all the
+                        µWebSockets logic in a proper C++ class obv we don't
+                        need all this crap<br />
+                        just to get our socket server running, but this is just
+                        sorta a good practice just to organize our code and all.
+                    </p>
+                    <p><strong>What the hell is this?</strong></p>
+                    <ul>
+                        <li>
+                            <strong>SocketData struct</strong>: This is the most
+                            important part. µWebSockets is fast because it's
+                            stateless.<br />
+                            If you want to associate data with a connection
+                            (like a user ID, auth token, etc.), you define it in
+                            this struct.<br />
+                            The library will then allocate this struct
+                            per-connection for you.
+                        </li>
+                        <li>
+                            <strong>Type aliases (using WebSocket = …)</strong>:
+                            The uWS::WebSocket template is a monstrosity.
+                        </li>
+                        <li>
+                            <strong
+                                >Callbacks (on_open, on_message,
+                                on_close)</strong
+                            >: These are our class methods that<br />
+                            will handle the WebSocket event lifecycle. We'll
+                            wire them up in the .cpp file.
+                        </li>
+                        <li>
+                            <strong>uWS::SSLApp app_;</strong>: This is the
+                            actual µWebSockets server object. We initialize it
+                            with our SSL certs.
+                        </li>
+                    </ul>
+                    <h3 id="step-2-the-implementation">
+                        Step 2: The Implementation
+                    </h3>
+                    <p>
+                        <strong><code>src/WebSocketServer.cpp</code></strong>
+                    </p>
+                    <pre><code class="cpp language-cpp">#include "include/WebSocketServer.hpp"
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+
+WebSocketServer::WebSocketServer(int port, const std::string &amp;key_file,
+                                 const std::string &amp;cert_file)
+    : key_file_(key_file), cert_file_(cert_file),
+      app_({
+          .key_file_name = key_file_.c_str(),
+          .cert_file_name = cert_file_.c_str(),
+      }),
+      port_(port) {
+    setup_routes();
+}
+
+void WebSocketServer::setup_routes() {
+    // We might've just made the on_* function static in the header and could've
+    // done {.open = on_open(ws);} but this would later create pain in our ass
+    // when we try to access some non static member variables from our class.
+    app_.ws&lt;SocketData&gt;(
+        "/*",
+        {.open = [this](auto *ws) { this-&gt;on_open(ws); },
+         .message = [this](auto *ws, std::string_view msg,
+                           uWS::OpCode op) { this-&gt;on_message(ws, msg, op); },
+         .close =
+             [this](auto *ws, int code, std::string_view msg) {
+                 this-&gt;on_close(ws, code, msg);
+             }});
+
+    app_.get("/health", [](auto *res, auto *req) {
+        res-&gt;writeStatus("200 OK")
+            -&gt;writeHeader("Content-Type", "application/json")
+            -&gt;end(R"({"status":"healthy"})");
+    });
+}
+
+void WebSocketServer::on_open(WebSocket *ws) {
+    auto *data = ws-&gt;getUserData();
+
+    data-&gt;user_id = std::to_string(reinterpret_cast&lt;uintptr_t&gt;(ws));
+    data-&gt;connected_at =
+        std::chrono::system_clock::now().time_since_epoch().count();
+
+    std::cout &lt;&lt; "[+] Connection from " &lt;&lt; data-&gt;user_id &lt;&lt; "\n";
+
+    ws-&gt;send(R"({"event":"connected","message":"Welcome!"})",
+             uWS::OpCode::TEXT);
+}
+
+void WebSocketServer::on_message(WebSocket *ws, std::string_view message,
+                                 uWS::OpCode op_code) {
+    auto *data = ws-&gt;getUserData();
+
+    std::cout &lt;&lt; "[-&gt;] Message from " &lt;&lt; data-&gt;user_id &lt;&lt; ": " &lt;&lt; message
+              &lt;&lt; "\n";
+
+    // Echo it back (you'll want to do something smarter here)
+    ws-&gt;send(message, op_code);
+}
+
+void WebSocketServer::on_close(WebSocket *ws, int code,
+                               std::string_view message) {
+    auto *data = ws-&gt;getUserData();
+
+    std::cout &lt;&lt; "[-] " &lt;&lt; data-&gt;user_id &lt;&lt; " disconnected\n";
+}
+
+void WebSocketServer::run() {
+    app_.listen(port_,
+                [this](auto *socket) {
+                    if (socket) {
+                        std::cout &lt;&lt; "\nWebSocket server listening on port "
+                                  &lt;&lt; port_ &lt;&lt; "\n";
+                        std::cout &lt;&lt; "WSS endpoint: wss://localhost:" &lt;&lt; port_
+                                  &lt;&lt; "\n";
+                        std::cout &lt;&lt; "Health check: https://localhost:" &lt;&lt; port_
+                                  &lt;&lt; "/health\n\n";
+                    } else {
+                        std::cerr
+                            &lt;&lt; "webSocket server failed to listen on port "
+                            &lt;&lt; port_ &lt;&lt; std::endl;
+                        return;
+                    }
+                })
+        .run();
+}
+</code></pre>
+                    <h4 id="breaking-it-down">Breaking It Down</h4>
+                    <p>
+                        The <strong>constructor</strong> and
+                        <strong><code>run()</code></strong> method are the main
+                        entry points since<br />
+                        they’re called directly from <code>main.cpp</code>.
+                    </p>
+                    <p>
+                        The
+                        <strong>constructor</strong>
+                        (<code>WebSocketServer::WebSocketServer(...)</code>)
+                        uses an<br />
+                        initializer list (<code>: ...</code>) to store the port,
+                        key, and cert paths. More<br />
+                        importantly, it initializes the
+                        <code>uWS::SSLApp app_</code> with an options struct<br />
+                        that includes the SSL file paths. After that, it just
+                        calls<br />
+                        <code>setup_routes()</code> to configure all routes.
+                    </p>
+                    <p>
+                        The <strong><code>setup_routes()</code></strong> method
+                        wires everything together:
+                    </p>
+                    <ul>
+                        <li>
+                            It sets up a WebSocket handler for all paths
+                            using<br />
+                            <code>.ws&lt;SocketData&gt;("/*", {...})</code>.
+                        </li>
+                        <li>
+                            Each event (<code>open</code>, <code>message</code>,
+                            <code>close</code>) is handled by a lambda that<br />
+                            captures <code>this</code>, allowing the callbacks
+                            to call member functions like<br />
+                            <code>this-&gt;on_open(ws)</code>.
+                        </li>
+                        <li>
+                            It also defines a simple HTTP route
+                            <code>/health</code> to verify the server is<br />
+                            up and running.
+                        </li>
+                    </ul>
+                    <p>
+                        Finally, the <strong><code>run()</code></strong> method
+                        does two main things:
+                    </p>
+                    <ol>
+                        <li>
+                            It calls <code>.listen(port_, ...)</code> to bind to
+                            the port. The callback checks<br />
+                            whether the bind succeeded (non-null
+                            <code>socket</code>) or failed (e.g. port in use).
+                        </li>
+                        <li>
+                            It chains <code>.run()</code>, which starts the
+                            server’s main event loop. This call<br />
+                            blocks the main thread and keeps the server running
+                            until the process<br />
+                            is terminated (for example, with
+                            <code>Ctrl+C</code>).
+                        </li>
+                    </ol>
+                    <h3 id="step-3-the-entry-point">Step 3: The Entry Point</h3>
+                    <p>
+                        <strong>Update your <code>src/main.cpp</code>:</strong>
+                    </p>
+                    <pre><code class="cpp language-cpp">#include "include/WebSocketServer.hpp"
+#include &lt;iostream&gt;
+
+int main() {
+    constexpr int PORT = 7000;
+
+    try {
+        WebSocketServer server(PORT, "../certs/key.pem", "../certs/cert.pem");
+        server.run();
+
+    } catch (const std::exception &amp;e) {
+        std::cerr &lt;&lt; "Error: " &lt;&lt; e.what() &lt;&lt; "\n";
+        return 1;
+    }
+
+    return 0;
+}
+</code></pre>
+                    <hr />
+                    <h3 id="step-4-build-and-run">Step 4: Build and Run</h3>
+                    <p>
+                        cmake -S thing if you haven't yet ran it, otherwise you
+                        can just follow the
+                        <code>cd build &amp;&amp; make</code> command.
+                    </p>
+                    <pre><code class="bash language-bash"># Build it
+cmake -S . -B build
+cd build &amp;&amp; make
+
+# Run it
+./websocket_server
+</code></pre>
+                    <p>
+                        If you did everything correctly you should see something
+                        like:<br />
+                        You should see:
+                    </p>
+                    <pre><code>✓ WebSocket server listening on port 7000
+✓ WSS endpoint: wss://localhost:7000
+✓ Health check: https://localhost:7000/health
+</code></pre>
+                    <p>
+                        <strong
+                            >Holy shit. You just built a WebSocket server in
+                            C++.</strong
+                        >
+                    </p>
+                    <p>
+                        This is just the surface of what you an do with
+                        µWebSockets.
+                    </p>
+                    <h2 id="step-5-testing-your-websocket-server">
+                        Step 5: Testing Your WebSocket Server
+                    </h2>
+                    <p>
+                        Alright, we built it. Time to see if this beast actually
+                        talks.
+                    </p>
+                    <h3 id="option-1-using-wscat">
+                        Option 1: Using <code>wscat</code>
+                    </h3>
+                    <p>
+                        If you’ve got Node.js installed, you can use the
+                        <code>wscat</code> CLI to test your<br />
+                        server in seconds.
+                    </p>
+                    <pre><code class="bash language-bash"># Install wscat globally
+npm install -g wscat
+
+# Connect to your server (use --no-check to ignore self-signed certs)
+wscat -c wss://localhost:7000 --no-check
+</code></pre>
+                    <p>
+                        If everything’s working, you should see something like
+                        this:
+                    </p>
+                    <pre><code class="bash language-bash">If everything’s working, you should see something like this:
+connected (press CTRL+C to quit)
+&lt; {"event":"connected","message":"Welcome!"}
+</code></pre>
+                    <p>Now type anything you want:</p>
+                    <pre><code class="bash language-bash">&gt; hello there
+&lt; hello there
+</code></pre>
+                    <p>
+                        Boom. It echoes back exactly what you sent. That’s your
+                        WebSocket server
+                    </p>
+                    <p>
+                        <img
+                            width="1365"
+                            height="739"
+                            alt="Image"
+                            src="https://github.com/user-attachments/assets/c8dcd9ae-a206-4bdb-bdf8-6d352565ba94"
+                        />
+                    </p>
+                    <hr />
+                    <h2
+                        id="lessons-learned-aka-things-that-made-me-question-my-life-choices"
+                    >
+                        Lessons Learned (aka: Things That Made Me Question My
+                        Life Choices)
+                    </h2>
+                    <p>
+                        So you’re load-testing your shiny new WebSocket server,
+                        and suddenly…<br />
+                        it dies at ~1015 connections. Every. Single. Time.
+                    </p>
+                    <p>
+                        If this happens, relax. It’s not your code. It’s your
+                        OS.
+                    </p>
+                    <p>
+                        By default, most systems cap the number of open file
+                        descriptors per<br />
+                        process (ulimit -n) to around 1024. Each WebSocket
+                        connection eats one.<br />
+                        Do the math.
+                    </p>
+                    <p>fix is simple:</p>
+                    <pre><code class="bash language-bash"># Temporary fix (resets on reboot)
+ulimit -n 65535
+</code></pre>
+                    <p>
+                        Fun fact: Node.js's ws implementation quietly handles
+                        this under the<br />
+                        hood, which is why you’ll see it scale past 5k
+                        connections without<br />
+                        breaking a sweat.<br />
+                        C++ makes you earn that performance the hard way.
+                    </p>
+                    <hr />
+                    <h2 id="wrapping-up">Wrapping Up</h2>
+                    <p>
+                        If you made it this far, congratulations, you just built
+                        a fully encrypted,<br />
+                        high-performance WebSocket backend in
+                        <strong>pure C++</strong>.
+                    </p>
+                    <blockquote>
+                        <p>“Why write a backend in C++?”</p>
+                        <p>
+                            Because we can.<br />
+                            And now, <strong>so can you.</strong>
+                        </p>
+                    </blockquote>
+                </div>
+            </article>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/cmake.min.js"></script>
+        <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
+        <script>
+            hljs.highlightAll();
+            hljs.addPlugin(
+                new CopyButtonPlugin({
+                    autohide: false,
+                }),
+            );
+        </script>
+    </body>
+</html>
