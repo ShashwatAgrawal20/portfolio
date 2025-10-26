@@ -4,11 +4,17 @@
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
 body {
     margin: 0;
-    padding: 20px;
+    padding: 0;
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
@@ -16,6 +22,7 @@ body {
     min-height: 100vh;
     background-color: #080819;
     color: #f8f8f2;
+    overflow-x: hidden;
     box-sizing: border-box;
     line-height: 1.6;
 }
