@@ -7,8 +7,11 @@
     "build": "node build-blog.js"
   },
   "dependencies": {
+    "@shikijs/markdown-it": "^3.15.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0",
     "node-fetch": "^2.7.0",
-    "showdown": "^2.1.0"
+    "shiki": "^3.15.0"
   },
   "devDependencies": {
     "prettier": "^3.6.2"

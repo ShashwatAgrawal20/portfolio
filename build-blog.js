@@ -1,8 +1,10 @@
 const fs = require("fs");
 const path = require("path");
-const showdown = require("showdown");
 const fetch = require("node-fetch");
 const prettier = require("prettier");
+const MarkdownIt = require("markdown-it");
+const Shiki = require("@shikijs/markdown-it");
+const anchor = require("markdown-it-anchor");
 
 const USERNAME = "ShashwatAgrawal20";
 const REPO = "portfolio";
@@ -10,21 +12,47 @@ const POST_LABEL = "blog-post";
 const POSTS_DIR = path.join(__dirname, "posts");
 const JSON_PATH = path.join(__dirname, "blog-posts.json");
 
-const converter = new showdown.Converter({
-    ghCompatibleHeaderId: true,
-    tables: true,
-    ghCodeBlocks: true,
-    tasklists: true,
-    strikethrough: true,
+let mdRenderer = null;
 
-    simpleLineBreaks: true,
-    literalMidWordUnderscores: true,
-    simplifiedAutoLink: true,
-    emoji: true,
+async function getMarkdownRenderer() {
+    if (mdRenderer) return mdRenderer;
 
-    parseImgDimensions: true,
-    excludeTrailingPunctuationFromURLs: true
-});
+    const md = new MarkdownIt({
+        html: true,
+        linkify: true,
+        typographer: true,
+        breaks: true
+    });
+
+    md.use(anchor, {
+        slugify: s =>
+            s.toLowerCase()
+                .trim()
+                .replace(/[^\w]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+    });
+
+    md.use(
+        await Shiki.default({
+            theme: "github-dark-default",
+        })
+    );
+
+    const originalFence = md.renderer.rules.fence;
+    md.renderer.rules.fence = function(...args) {
+        const html = originalFence(...args);
+
+        return `
+            <div class="code-wrapper">
+                ${html}
+                <button class="copy-btn">Copy</button>
+            </div>
+        `;
+    };
+
+    mdRenderer = md;
+    return mdRenderer;
+}
 
 async function fetchBlogPosts() {
     console.log("Fetching all blog posts...");
@@ -62,8 +90,9 @@ async function writePost(post) {
     const filepath = path.join(POSTS_DIR, filename);
 
     console.log(`Generating: ${filename}`);
-    const rawHtml = generatePostHTML(post);
-    const formattedHtml = await prettier.format(rawHtml, {
+    const rawHtml = await generatePostHTML(post);
+    const lazyimgHtml = rawHtml.replace(/<img(?![^>]*loading=)/g, '<img loading="lazy" decoding="async"');
+    const formattedHtml = await prettier.format(lazyimgHtml, {
         parser: "html",
         tabWidth: 4,
     });
@@ -91,18 +120,14 @@ async function writeBlogJson(postsList) {
     fs.writeFileSync(JSON_PATH, formattedJson);
 }
 
-function generatePostHTML(post) {
-    const htmlContent = converter.makeHtml(post.body);
+async function generatePostHTML(post) {
+    const md = await getMarkdownRenderer();
+    const htmlContent = md.render(post.body);
     const postDate = new Date(post.created_at).toLocaleString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
     });
-    const needsCMake = post.body.includes("```cmake");
-    const cmakeScriptTag = needsCMake
-        ? `<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/cmake.min.js"></script>`
-        : "";
-
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -116,27 +141,18 @@ function generatePostHTML(post) {
         <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
         <link rel="manifest" href="../site.webmanifest">
         <link rel="stylesheet" href="../style.css" />
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-        />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/tokyo-night-dark.min.css">
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css"
-        />
         </head>
     <body>
         <div class="container">
             <a href="../index.html" class="back-link">
-                <i class="fas fa-arrow-left"></i> Back to Portfolio
+                < Back to Portfolio
             </a>
             <article>
                 <h1>${escapeHtml(post.title)}</h1>
                 <div class="post-meta">
                     Posted on ${postDate} •
                     <a href="${post.html_url}" target="_blank">
-                        <i class="fas fa-comment"></i> Discuss on GitHub
+                        Discuss on GitHub
                     </a>
                 </div>
                 <div class="post-content">
@@ -144,18 +160,28 @@ function generatePostHTML(post) {
                 </div>
             </article>
         </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-    ${cmakeScriptTag}
-    <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
-    <script>
-        hljs.highlightAll();
-        hljs.addPlugin(
-          new CopyButtonPlugin({
-            autohide: false,
-          })
-        );
-    </script>
     </body>
+    <script>
+        document.addEventListener("click", async (e) => {
+            const btn = e.target.closest(".copy-btn");
+            if (!btn) return;
+            const wrapper = btn.closest(".code-wrapper");
+            const codeEl = wrapper.querySelector("pre");
+            const code = codeEl.textContent.trim();
+            btn.disabled = true;
+            try {
+                await navigator.clipboard.writeText(code);
+                btn.textContent = "Copied!";
+            } catch (err) {
+                console.error(err);
+                btn.textContent = "Failed";
+            }
+            setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.disabled = false;
+            }, 1500);
+        });
+    </script>
     </html>`;
 }
 
@@ -248,7 +274,7 @@ async function main() {
         await fullRebuild();
     }
 
-    console.log("✅ Blog build complete!");
+    console.log("Blog build complete!");
 }
 
 main().catch((err) => {

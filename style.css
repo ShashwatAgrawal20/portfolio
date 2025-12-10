@@ -49,10 +49,14 @@ h2 {
     margin-bottom: 0.3em;
 }
 
-p,
+p {
+    color: #f8f8f2;
+    font-size: 1em;
+    line-height: 1.6;
+}
+
 li {
     color: #f8f8f2;
-    font-size: 1.1em;
     line-height: 1.6;
 }
 
@@ -110,7 +114,7 @@ blockquote {
 .social-links a {
     color: #50fa7b;
     text-decoration: none;
-    font-size: 1.3em;
+    font-size: 1em;
     padding: 8px 12px;
     transition: all 0.3s ease;
     display: flex;
@@ -123,8 +127,6 @@ blockquote {
 .social-links a:hover {
     color: #ff79c6;
     background-color: rgba(255, 121, 198, 0.1);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 6px rgba(255, 121, 198, 0.3);
     text-decoration: none;
 }
 
@@ -249,16 +251,21 @@ blockquote {
 
 .post-content p {
     margin: 1em 0;
+    white-space: normal;
 }
 
-/* .post-content a and a:hover rules are covered by global styles */
+.post-content li {
+    margin-bottom: 0.4em;
+}
 
-.post-content pre {
-    background-color: #1a1b26;
+.post-content li p {
+    margin: 0.4em 0;
+}
+
+pre.shiki {
     padding: 15px;
     border-radius: 6px;
     overflow-x: auto;
-    color: #f8f8f2;
 }
 
 .post-content code {
@@ -330,4 +337,30 @@ blockquote {
         font-size: 1.3em;
         padding: 6px 10px;
     }
+}
+
+.code-wrapper {
+    position: relative;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: 1px solid #6272a4;
+    color: #f8f8f2;
+    padding: 4px 8px;
+    font-size: 0.8em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: #6272a4;
+}
+
+.copy-btn:active {
+    background: #bd93f9;
 }
