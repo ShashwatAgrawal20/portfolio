@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            A WebSocket Server in C++ using uWebSocket library. - Shashwat
+            Agrawal
+        </title>
+        <meta
+            name="description"
+            content="A WebSocket Server in C++ using uWebSocket library."
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="../apple-touch-icon.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="../favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="../favicon-16x16.png"
+        />
+        <link rel="manifest" href="../site.webmanifest" />
+        <link rel="stylesheet" href="../style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <a href="../index.html" class="back-link"> < Back to Portfolio </a>
+            <article>
+                <h1>A WebSocket Server in C++ using uWebSocket library.</h1>
+                <div class="post-meta">
+                    Posted on October 22, 2025 •
+                    <a
+                        href="https://github.com/ShashwatAgrawal20/portfolio/issues/1"
+                        target="_blank"
+                    >
+                        Discuss on GitHub
+                    </a>
+                </div>
+                <div class="post-content">
+                    <blockquote>
+                        <p>
+                            “Why the fuck would I write a backend service in C++
+                            and not glorious JavaScript?”
+                        </p>
+                    </blockquote>
+                    <p>Because we can. And we will.</p>
+                    <h2 id="table-of-contents" tabindex="-1">
+                        Table of Contents
+                    </h2>
+                    <ol>
+                        <li>
+                            <a href="#why-c-for-backend-services"
+                                >Why C++ for Backend Services</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#what-makes-%C2%B5websockets-legendary"
+                                >What Makes µWebSockets Legendary</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#part-1-the-build-that-works"
+                                >Part 1: The Build That Works</a
+                            >
+                            <ul>
+                                <li>
+                                    <a
+                                        href="#installing-%C2%B5websockets-as-a-git-submodule"
+                                        >Installing µWebSockets as a Git
+                                        Submodule</a
+                                    >
+                                </li>
+                                <li>
+                                    <a
+                                        href="#cmake-setup-the-part-everyone-fucks-up"
+                                        >CMake Setup: The Part Everyone Fucks
+                                        Up</a
+                                    >
+                                    <ul>
+                                        <li>
+                                            <a href="#building-the-library"
+                                                >Building the Library</a
+                                            >
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a
+                                        href="#ssl-certificates-because-security-matters"
+                                        >SSL Certificates: Because Security
+                                        Matters</a
+                                    >
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#part-2-the-code">Part 2: The Code</a>
+                            <ul>
+                                <li>
+                                    <a href="#step-1-the-header-file"
+                                        >Step 1: The Header File</a
+                                    >
+                                </li>
+                                <li>
+                                    <a href="#step-2-the-implementation"
+                                        >Step 2: The Implementation</a
+                                    >
+                                    <ul>
+                                        <li>
+                                            <a href="#breaking-it-down"
+                                                >Breaking It Down</a
+                                            >
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#step-3-the-entry-point"
+                                        >Step 3: The Entry Point</a
+                                    >
+                                </li>
+                                <li>
+                                    <a href="#step-4-build-and-run"
+                                        >Step 4: Build and Run</a
+                                    >
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#step-5-testing-your-websocket-server"
+                                >Step 5: Testing Your WebSocket Server</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="#lessons-learned-aka-things-that-made-me-question-my-life-choices"
+                                >Lessons Learned (aka: Things That Made Me
+                                Question My Life Choices)</a
+                            >
+                        </li>
+                        <li><a href="#wrapping-up">Wrapping Up</a></li>
+                    </ol>
+                    <h2 id="why-c-for-backend-services" tabindex="-1">
+                        Why C++ for Backend Services?
+                    </h2>
+                    <p>
+                        <strong
+                            >Again, Because we fucking can. And we fucking
+                            will.</strong
+                        >
+                    </p>
+                    <p>
+                        We’re not building another Todo app. We’re not “moving
+                        JSON from one box to another.” We’re building systems
+                        that handle millions of concurrent connections, where
+                        every nanosecond and every byte of RAM counts. We’re
+                        building the shit that financial exchanges, AAA game
+                        servers, and high-frequency trading bots run on.
+                    </p>
+                    <p>
+                        When you need that kind of raw, unadulterated,
+                        “melt-your-CPU-in-a-good-way” performance, you don’t
+                        reach for a tool built for animating browser buttons.
+                    </p>
+                    <p>
+                        <a href="https://github.com/uNetworking/uWebSockets"
+                            >µWebSockets</a
+                        >
+                        isn’t just fast - it’s so fast it does encrypted TLS 1.3
+                        messaging quicker than most servers can handle
+                        unencrypted traffic.<br />
+                        Read that again.
+                    </p>
+                    <h2 id="what-makes-websockets-legendary" tabindex="-1">
+                        What Makes µWebSockets Legendary?
+                    </h2>
+                    <p>
+                        This isn’t your typical “look ma, I made a server”
+                        library. µWebSockets powers some of the biggest crypto
+                        exchanges in the world, handling billions of USD in
+                        trades every single day. When you trade crypto, there’s
+                        a good chance you’re doing it through µWebSockets and
+                        don’t even know it.
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Battle-tested since 2016</strong> - Perfect
+                            Autobahn|Testsuite compliance
+                        </li>
+                        <li>
+                            <strong>95% daily fuzzing coverage</strong> -
+                            Google’s OSS-Fuzz, zero sanitizer issues
+                        </li>
+                        <li>
+                            <strong>LGTM score: A+</strong> - Zero CodeQL alerts
+                        </li>
+                        <li>
+                            <strong>Trusted by the big boys</strong> - BitMEX,
+                            Bitfinex, Coinbase, and the exchanges that move
+                            billions daily
+                        </li>
+                    </ul>
+                    <h2 id="part-1-the-build-that-works" tabindex="-1">
+                        Part 1: The Build that Works
+                    </h2>
+                    <h3
+                        id="installing-websockets-as-a-git-submodule"
+                        tabindex="-1"
+                    >
+                        Installing µWebSockets as a git submodule
+                    </h3>
+                    <blockquote>
+                        <p>
+                            This is not Ja*aScript, it’s c++ have to build your
+                            own stuff. This is what separates us from the js
+                            andies.
+                        </p>
+                    </blockquote>
+                    <p>
+                        First, we get our dependencies.
+                        <code>uWebSockets</code> as a git submodule.
+                    </p>
+                    <blockquote>
+                        <p>
+                            [!NOTE]<br />
+                            you need to have a git repo initialized for this.
+                        </p>
+                    </blockquote>
+                    <p>
+                        This might take a while depending on your internet
+                        connection.
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#8B949E"># Add µWebSockets as a submodule</span></span>
+<span class="line"><span style="color:#FFA657">git</span><span style="color:#A5D6FF"> submodule</span><span style="color:#A5D6FF"> add</span><span style="color:#A5D6FF"> https://github.com/uNetworking/uWebSockets.git</span><span style="color:#A5D6FF"> external/uwebsockets</span></span>
+<span class="line"><span style="color:#FFA657">git</span><span style="color:#A5D6FF"> submodule</span><span style="color:#A5D6FF"> update</span><span style="color:#79C0FF"> --init</span><span style="color:#79C0FF"> --recursive</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <h3
+                        id="cmake-setup-the-part-everyone-fucks-up"
+                        tabindex="-1"
+                    >
+                        CMake Setup: The Part Everyone Fucks Up
+                    </h3>
+                    <blockquote>
+                        <p>
+                            You Thought You Could Just ‘cmake .’? That’s Fucking
+                            Adorable.<br />
+                            Your dependencies don’t give a shit about your
+                            feelings. They don’t use your build system.
+                        </p>
+                    </blockquote>
+                    <p>
+                        <strong
+                            >The Problem Most Tutorials Don’t Tell You</strong
+                        ><br />
+                        µWebSockets depends on uSockets - the underlying I/O
+                        layer that makes everything fast. uSockets has its own
+                        Makefile, and it works perfectly.
+                    </p>
+                    <p>The Secret Sauce: Let uSockets Build Itself</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-cmake"><span class="line"><span style="color:#FF7B72">cmake_minimum_required</span><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">VERSION</span><span style="color:#E6EDF3"> 3.20)</span></span>
+<span class="line"><span style="color:#FF7B72">project</span><span style="color:#E6EDF3">(WebSocketServer CXX)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">set</span><span style="color:#E6EDF3">(CMAKE_CXX_STANDARD 23)</span></span>
+<span class="line"><span style="color:#FF7B72">set</span><span style="color:#E6EDF3">(CMAKE_CXX_STANDARD_REQUIRED </span><span style="color:#FF7B72">ON</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">set</span><span style="color:#E6EDF3">(CMAKE_EXPORT_COMPILE_COMMANDS </span><span style="color:#FF7B72">ON</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">set</span><span style="color:#E6EDF3">(TARGET_NAME websocket_server)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># ============================================</span></span>
+<span class="line"><span style="color:#8B949E"># Find System Dependencies</span></span>
+<span class="line"><span style="color:#8B949E"># ============================================</span></span>
+<span class="line"><span style="color:#FF7B72">find_package</span><span style="color:#E6EDF3">(OpenSSL REQUIRED)</span></span>
+<span class="line"><span style="color:#FF7B72">find_package</span><span style="color:#E6EDF3">(ZLIB REQUIRED)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># ============================================</span></span>
+<span class="line"><span style="color:#8B949E"># Build uSockets (The Secret Sauce)</span></span>
+<span class="line"><span style="color:#8B949E"># ============================================</span></span>
+<span class="line"><span style="color:#FF7B72">set</span><span style="color:#E6EDF3">(USOCKETS_SOURCE_DIR </span><span style="color:#FF7B72">${CMAKE_CURRENT_SOURCE_DIR}</span><span style="color:#E6EDF3">/external/uwebsockets/uSockets)</span></span>
+<span class="line"><span style="color:#FF7B72">set</span><span style="color:#E6EDF3">(USOCKETS_LIBRARY </span><span style="color:#FF7B72">${USOCKETS_SOURCE_DIR}</span><span style="color:#E6EDF3">/uSockets.a)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># Build uSockets using its own Makefile with OpenSSL support</span></span>
+<span class="line"><span style="color:#FF7B72">add_custom_command</span><span style="color:#E6EDF3">(</span></span>
+<span class="line"><span style="color:#E6EDF3">    OUTPUT </span><span style="color:#FF7B72">${USOCKETS_LIBRARY}</span></span>
+<span class="line"><span style="color:#FF7B72">    COMMAND</span><span style="color:#FF7B72"> ${CMAKE_MAKE_PROGRAM}</span><span style="color:#E6EDF3"> WITH_OPENSSL=1 -C </span><span style="color:#FF7B72">${USOCKETS_SOURCE_DIR}</span></span>
+<span class="line"><span style="color:#FF7B72">    COMMENT</span><span style="color:#A5D6FF"> "Building uSockets library with OpenSSL support"</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">add_custom_target</span><span style="color:#E6EDF3">(build_usockets ALL </span><span style="color:#79C0FF">DEPENDS</span><span style="color:#FF7B72"> ${USOCKETS_LIBRARY}</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># Import uSockets as a CMake library</span></span>
+<span class="line"><span style="color:#FF7B72">add_library</span><span style="color:#E6EDF3">(uSockets STATIC </span><span style="color:#79C0FF">IMPORTED</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">set_target_properties</span><span style="color:#E6EDF3">(uSockets PROPERTIES</span></span>
+<span class="line"><span style="color:#79C0FF">    IMPORTED_LOCATION</span><span style="color:#A5D6FF"> "${USOCKETS_LIBRARY}"</span></span>
+<span class="line"><span style="color:#79C0FF">    INTERFACE_INCLUDE_DIRECTORIES</span><span style="color:#A5D6FF"> "${USOCKETS_SOURCE_DIR}/src"</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">add_dependencies</span><span style="color:#E6EDF3">(uSockets build_usockets)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># ============================================</span></span>
+<span class="line"><span style="color:#8B949E"># Create µWebSockets Interface Library</span></span>
+<span class="line"><span style="color:#8B949E"># ============================================</span></span>
+<span class="line"><span style="color:#FF7B72">add_library</span><span style="color:#E6EDF3">(uWebSockets_Interface </span><span style="color:#79C0FF">INTERFACE</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">target_include_directories</span><span style="color:#E6EDF3">(uWebSockets_Interface </span><span style="color:#79C0FF">INTERFACE</span></span>
+<span class="line"><span style="color:#FF7B72">    ${CMAKE_CURRENT_SOURCE_DIR}</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">target_link_libraries</span><span style="color:#E6EDF3">(uWebSockets_Interface </span><span style="color:#79C0FF">INTERFACE</span></span>
+<span class="line"><span style="color:#E6EDF3">    uSockets</span></span>
+<span class="line"><span style="color:#E6EDF3">    ZLIB::ZLIB</span></span>
+<span class="line"><span style="color:#E6EDF3">    OpenSSL::SSL</span></span>
+<span class="line"><span style="color:#E6EDF3">    OpenSSL::Crypto</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># ============================================</span></span>
+<span class="line"><span style="color:#8B949E"># Build Your Application</span></span>
+<span class="line"><span style="color:#8B949E"># ============================================</span></span>
+<span class="line"><span style="color:#FF7B72">file</span><span style="color:#E6EDF3">(GLOB TARGET_SOURCES </span><span style="color:#A5D6FF">"src/*.cpp"</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">list</span><span style="color:#E6EDF3">(FILTER TARGET_SOURCES EXCLUDE REGEX </span><span style="color:#A5D6FF">".*/main</span><span style="color:#FF7B72">\\</span><span style="color:#A5D6FF">.cpp$"</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">add_library</span><span style="color:#E6EDF3">(app_lib STATIC </span><span style="color:#FF7B72">${TARGET_SOURCES}</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">target_link_libraries</span><span style="color:#E6EDF3">(app_lib </span><span style="color:#79C0FF">PUBLIC</span><span style="color:#E6EDF3"> uWebSockets_Interface)</span></span>
+<span class="line"><span style="color:#FF7B72">target_include_directories</span><span style="color:#E6EDF3">(app_lib </span><span style="color:#79C0FF">PUBLIC</span><span style="color:#FF7B72"> ${CMAKE_CURRENT_SOURCE_DIR}</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">add_dependencies</span><span style="color:#E6EDF3">(app_lib build_usockets)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">add_executable</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">${TARGET_NAME}</span><span style="color:#E6EDF3"> src/main.cpp)</span></span>
+<span class="line"><span style="color:#FF7B72">target_link_libraries</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">${TARGET_NAME}</span><span style="color:#79C0FF"> PRIVATE</span><span style="color:#E6EDF3"> app_lib)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># Compiler warnings (because we're professionals)</span></span>
+<span class="line"><span style="color:#FF7B72">if</span><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">MSVC</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">    target_compile_options</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">${TARGET_NAME}</span><span style="color:#79C0FF"> PRIVATE</span><span style="color:#E6EDF3"> /W4 /WX)</span></span>
+<span class="line"><span style="color:#FF7B72">else</span><span style="color:#E6EDF3">()</span></span>
+<span class="line"><span style="color:#FF7B72">    target_compile_options</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">${TARGET_NAME}</span><span style="color:#79C0FF"> PRIVATE</span><span style="color:#E6EDF3"> -Wall -Wextra -Wpedantic)</span></span>
+<span class="line"><span style="color:#FF7B72">endif</span><span style="color:#E6EDF3">()</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <h4 id="building-the-library" tabindex="-1">
+                        Building the Library
+                    </h4>
+                    <p>
+                        <strong
+                            >BEFORE YOU RUN THIS BUILD COMMAND YOU NEED TO HAVE
+                            A <code>src/main.cpp</code> AND
+                            <code>src/WebSocketServer.cpp</code> FILE</strong
+                        >
+                    </p>
+                    <p>
+                        The <code>src/WebSocketServer.cpp</code> file can even
+                        be empty. And you can have a minimal program like this
+                        in your <code>src/main.cpp</code>:
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-cpp"><span class="line"><span style="color:#FF7B72">int</span><span style="color:#D2A8FF"> main</span><span style="color:#E6EDF3">() {</span></span>
+<span class="line"><span style="color:#FF7B72">    return</span><span style="color:#79C0FF"> 0</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Don’t worry, we’ll write the actual code later. This is
+                        just to test that CMake works.
+                    </p>
+                    <blockquote>
+                        <p>
+                            <strong>Note:</strong> Not sure if this shit will
+                            work on Windows due to those glob patterns in
+                            CMake.<br />
+                            If you’re on Windows and hit issues, you might need
+                            to explicitly list your source files<br />
+                            instead of using <code>file(GLOB ...)</code>. But
+                            that’s a Windows problem, not a you problem.
+                        </p>
+                    </blockquote>
+                    <p><strong>Create the basic structure:</strong></p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FFA657">mkdir</span><span style="color:#79C0FF"> -p</span><span style="color:#A5D6FF"> include</span><span style="color:#A5D6FF"> src</span><span style="color:#A5D6FF"> certs</span></span>
+<span class="line"><span style="color:#FFA657">touch</span><span style="color:#A5D6FF"> src/main.cpp</span><span style="color:#A5D6FF"> src/WebSocketServer.cpp</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Your directory structure should look something like this
+                        now:
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#79C0FF">.</span></span>
+<span class="line"><span style="color:#FFA657">├──</span><span style="color:#A5D6FF"> certs</span></span>
+<span class="line"><span style="color:#FFA657">├──</span><span style="color:#A5D6FF"> CMakeLists.txt</span></span>
+<span class="line"><span style="color:#FFA657">├──</span><span style="color:#A5D6FF"> external</span></span>
+<span class="line"><span style="color:#FFA657">│  </span><span style="color:#A5D6FF"> └──</span><span style="color:#A5D6FF"> uwebsockets</span><span style="color:#8B949E">        # created by git submodule</span></span>
+<span class="line"><span style="color:#FFA657">├──</span><span style="color:#A5D6FF"> include</span></span>
+<span class="line"><span style="color:#FFA657">└──</span><span style="color:#A5D6FF"> src</span></span>
+<span class="line"><span style="color:#FFA657">    ├──</span><span style="color:#A5D6FF"> main.cpp</span></span>
+<span class="line"><span style="color:#FFA657">    └──</span><span style="color:#A5D6FF"> WebSocketServer.cpp</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFA657">6</span><span style="color:#A5D6FF"> directories,</span><span style="color:#79C0FF"> 3</span><span style="color:#A5D6FF"> files</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>Run this in the root of your project:</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FFA657">cmake</span><span style="color:#79C0FF"> -S</span><span style="color:#A5D6FF"> .</span><span style="color:#79C0FF"> -B</span><span style="color:#A5D6FF"> build</span></span>
+<span class="line"><span style="color:#79C0FF">cd</span><span style="color:#A5D6FF"> build</span><span style="color:#E6EDF3"> &#x26;&#x26; </span><span style="color:#FFA657">make</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        At this point, you might be thinking “great, it works!”
+                        and you’d be right. It does work. It works
+                        beautifully.<br />
+                        <strong>Until you try to add SSL.</strong>
+                    </p>
+                    <hr />
+                    <h3
+                        id="ssl-certificates-because-security-matters"
+                        tabindex="-1"
+                    >
+                        SSL Certificates: Because Security Matters
+                    </h3>
+                    <p>
+                        We’re using <code>wss://</code> (Secure WebSockets), not
+                        that unencrypted peasant shit. For local development,
+                        self-signed certificates work fine.
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#8B949E"># Generate self-signed certificate (valid for 365 days)</span></span>
+<span class="line"><span style="color:#FFA657">openssl</span><span style="color:#A5D6FF"> req</span><span style="color:#79C0FF"> -x509</span><span style="color:#79C0FF"> -sha256</span><span style="color:#79C0FF"> -newkey</span><span style="color:#A5D6FF"> rsa:2048</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">    -keyout</span><span style="color:#A5D6FF"> certs/key.pem</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">    -out</span><span style="color:#A5D6FF"> certs/cert.pem</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">    -days</span><span style="color:#79C0FF"> 365</span><span style="color:#79C0FF"> -nodes</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">    -subj</span><span style="color:#A5D6FF"> "/C=IN/O=MY ORG./CN=localhost"</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">    -addext</span><span style="color:#A5D6FF"> "subjectAltName = DNS:localhost"</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <h2 id="part-2-the-code" tabindex="-1">Part 2: The Code</h2>
+                    <p>
+                        Now that we’ve got our build system unfucked, it’s time
+                        to write the actual server. We’re keeping this clean,
+                        and simple.
+                    </p>
+                    <blockquote>
+                        <p>
+                            NOTE: we’re not going to write a 5000 lines code,
+                            we’ll be keeping things fairly straight forward to
+                            understand.
+                        </p>
+                    </blockquote>
+                    <ul>
+                        <li>
+                            A WebSocket server class (one header, one
+                            implementation)
+                        </li>
+                        <li>Event handlers that make sense</li>
+                        <li>A main function that just works</li>
+                        <li>That’s it. No bullshit.</li>
+                    </ul>
+                    <h3 id="step-1-the-header-file" tabindex="-1">
+                        Step 1: The Header File
+                    </h3>
+                    <p>
+                        <strong
+                            ><code>include/WebSocketServer.hpp</code></strong
+                        >
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-cpp"><span class="line"><span style="color:#FF7B72">#pragma</span><span style="color:#79C0FF"> once</span></span>
+<span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> "external/uwebsockets/src/App.h"</span></span>
+<span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> &#x3C;string></span></span>
+<span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> &#x3C;string_view></span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">class</span><span style="color:#FFA657"> WebSocketServer</span><span style="color:#E6EDF3"> {</span></span>
+<span class="line"><span style="color:#FF7B72">  public:</span></span>
+<span class="line"><span style="color:#FF7B72">    explicit</span><span style="color:#D2A8FF"> WebSocketServer</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">int</span><span style="color:#FFA657"> port</span><span style="color:#E6EDF3">, </span><span style="color:#FF7B72">const</span><span style="color:#FFA657"> std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">string</span><span style="color:#FF7B72"> &#x26;</span><span style="color:#FFA657">key_file</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#FF7B72">                             const</span><span style="color:#FFA657"> std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">string</span><span style="color:#FF7B72"> &#x26;</span><span style="color:#FFA657">cert_file</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E">    // Run the server (this blocks until shutdown)</span></span>
+<span class="line"><span style="color:#FF7B72">    void</span><span style="color:#D2A8FF"> run</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">  private:</span></span>
+<span class="line"><span style="color:#8B949E">    // Per-connection data - store whatever you need here</span></span>
+<span class="line"><span style="color:#FF7B72">    struct</span><span style="color:#FFA657"> SocketData</span><span style="color:#E6EDF3"> {</span></span>
+<span class="line"><span style="color:#FFA657">        std</span><span style="color:#E6EDF3">::string user_id;</span></span>
+<span class="line"><span style="color:#FF7B72">        uint64_t</span><span style="color:#E6EDF3"> connected_at;</span></span>
+<span class="line"><span style="color:#E6EDF3">    };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E">    // Type aliases to keep our sanity</span></span>
+<span class="line"><span style="color:#FF7B72">    constexpr</span><span style="color:#FF7B72"> static</span><span style="color:#FF7B72"> bool</span><span style="color:#E6EDF3"> IS_USING_SSL </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> true</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#FF7B72">    constexpr</span><span style="color:#FF7B72"> static</span><span style="color:#FF7B72"> bool</span><span style="color:#E6EDF3"> IS_SERVER </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> true</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#FF7B72">    using</span><span style="color:#FFA657"> WebSocket</span><span style="color:#FF7B72"> =</span><span style="color:#FFA657"> uWS</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">WebSocket</span><span style="color:#E6EDF3">&#x3C;</span><span style="color:#FFA657">IS_USING_SSL</span><span style="color:#E6EDF3">, </span><span style="color:#FFA657">IS_SERVER</span><span style="color:#E6EDF3">, </span><span style="color:#FFA657">SocketData</span><span style="color:#E6EDF3">>;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E">    // The lifecycle callbacks</span></span>
+<span class="line"><span style="color:#FF7B72">    void</span><span style="color:#D2A8FF"> setup_routes</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"><span style="color:#FF7B72">    void</span><span style="color:#D2A8FF"> on_listen</span><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">us_listen_socket_t</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">listen_socket</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#FF7B72">    void</span><span style="color:#D2A8FF"> on_open</span><span style="color:#E6EDF3">(</span><span style="color:#FFA657">WebSocket</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#FF7B72">    void</span><span style="color:#D2A8FF"> on_message</span><span style="color:#E6EDF3">(</span><span style="color:#FFA657">WebSocket</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">, </span><span style="color:#FFA657">std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">string_view</span><span style="color:#FFA657"> message</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#FFA657">                    uWS</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">OpCode</span><span style="color:#FFA657"> op_code</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#FF7B72">    void</span><span style="color:#D2A8FF"> on_close</span><span style="color:#E6EDF3">(</span><span style="color:#FFA657">WebSocket</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">, </span><span style="color:#FF7B72">int</span><span style="color:#FFA657"> code</span><span style="color:#E6EDF3">, </span><span style="color:#FFA657">std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">string_view</span><span style="color:#FFA657"> message</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E">    // Member variables</span></span>
+<span class="line"><span style="color:#FFA657">    std</span><span style="color:#E6EDF3">::string key_file_;</span></span>
+<span class="line"><span style="color:#FFA657">    std</span><span style="color:#E6EDF3">::string cert_file_;</span></span>
+<span class="line"><span style="color:#FFA657">    uWS</span><span style="color:#E6EDF3">::SSLApp app_;</span></span>
+<span class="line"><span style="color:#FF7B72">    int</span><span style="color:#E6EDF3"> port_;</span></span>
+<span class="line"><span style="color:#E6EDF3">};</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        This is our main server class. We’re wrapping all the
+                        µWebSockets logic in a proper C++ class obv we don’t
+                        need all this crap<br />
+                        just to get our socket server running, but this is just
+                        sorta a good practice just to organize our code and all.
+                    </p>
+                    <p><strong>What the hell is this?</strong></p>
+                    <ul>
+                        <li>
+                            <strong>SocketData struct</strong>: This is the most
+                            important part. µWebSockets is fast because it’s
+                            stateless.<br />
+                            If you want to associate data with a connection
+                            (like a user ID, auth token, etc.), you define it in
+                            this struct.<br />
+                            The library will then allocate this struct
+                            per-connection for you.
+                        </li>
+                        <li>
+                            <strong>Type aliases (using WebSocket = …)</strong>:
+                            The uWS::WebSocket template is a monstrosity.
+                        </li>
+                        <li>
+                            <strong
+                                >Callbacks (on_open, on_message,
+                                on_close)</strong
+                            >: These are our class methods that<br />
+                            will handle the WebSocket event lifecycle. We’ll
+                            wire them up in the .cpp file.
+                        </li>
+                        <li>
+                            <strong>uWS::SSLApp app_;</strong>: This is the
+                            actual µWebSockets server object. We initialize it
+                            with our SSL certs.
+                        </li>
+                    </ul>
+                    <h3 id="step-2-the-implementation" tabindex="-1">
+                        Step 2: The Implementation
+                    </h3>
+                    <p>
+                        <strong><code>src/WebSocketServer.cpp</code></strong>
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-cpp"><span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> "include/WebSocketServer.hpp"</span></span>
+<span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> &#x3C;iostream></span></span>
+<span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> &#x3C;string></span></span>
+<span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> &#x3C;string_view></span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFA657">WebSocketServer</span><span style="color:#E6EDF3">::</span><span style="color:#D2A8FF">WebSocketServer</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">int</span><span style="color:#E6EDF3"> port, </span><span style="color:#FF7B72">const</span><span style="color:#FFA657"> std</span><span style="color:#E6EDF3">::string </span><span style="color:#FF7B72">&#x26;</span><span style="color:#E6EDF3">key_file,</span></span>
+<span class="line"><span style="color:#FF7B72">                                 const</span><span style="color:#FFA657"> std</span><span style="color:#E6EDF3">::string </span><span style="color:#FF7B72">&#x26;</span><span style="color:#E6EDF3">cert_file)</span></span>
+<span class="line"><span style="color:#E6EDF3">    : </span><span style="color:#D2A8FF">key_file_</span><span style="color:#E6EDF3">(key_file), </span><span style="color:#D2A8FF">cert_file_</span><span style="color:#E6EDF3">(cert_file),</span></span>
+<span class="line"><span style="color:#D2A8FF">      app_</span><span style="color:#E6EDF3">({</span></span>
+<span class="line"><span style="color:#E6EDF3">          .key_file_name </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> key_file_.</span><span style="color:#D2A8FF">c_str</span><span style="color:#E6EDF3">(),</span></span>
+<span class="line"><span style="color:#E6EDF3">          .cert_file_name </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> cert_file_.</span><span style="color:#D2A8FF">c_str</span><span style="color:#E6EDF3">(),</span></span>
+<span class="line"><span style="color:#E6EDF3">      }),</span></span>
+<span class="line"><span style="color:#D2A8FF">      port_</span><span style="color:#E6EDF3">(port) {</span></span>
+<span class="line"><span style="color:#D2A8FF">    setup_routes</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">void</span><span style="color:#FFA657"> WebSocketServer</span><span style="color:#E6EDF3">::</span><span style="color:#D2A8FF">setup_routes</span><span style="color:#E6EDF3">() {</span></span>
+<span class="line"><span style="color:#8B949E">    // We might've just made the on_* function static in the header and could've</span></span>
+<span class="line"><span style="color:#8B949E">    // done {.open = on_open(ws);} but this would later create pain in our ass</span></span>
+<span class="line"><span style="color:#8B949E">    // when we try to access some non static member variables from our class.</span></span>
+<span class="line"><span style="color:#E6EDF3">    app_.ws</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">SocketData</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">(</span></span>
+<span class="line"><span style="color:#A5D6FF">        "/*"</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#E6EDF3">        {.open </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> [</span><span style="color:#79C0FF">this</span><span style="color:#E6EDF3">](</span><span style="color:#FF7B72">auto</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">) { </span><span style="color:#79C0FF">this</span><span style="color:#E6EDF3">-></span><span style="color:#D2A8FF">on_open</span><span style="color:#E6EDF3">(ws); },</span></span>
+<span class="line"><span style="color:#E6EDF3">         .message </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> [</span><span style="color:#79C0FF">this</span><span style="color:#E6EDF3">](</span><span style="color:#FF7B72">auto</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">, </span><span style="color:#FFA657">std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">string_view</span><span style="color:#FFA657"> msg</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#FFA657">                           uWS</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">OpCode</span><span style="color:#FFA657"> op</span><span style="color:#E6EDF3">) { </span><span style="color:#79C0FF">this</span><span style="color:#E6EDF3">-></span><span style="color:#D2A8FF">on_message</span><span style="color:#E6EDF3">(ws, msg, op); },</span></span>
+<span class="line"><span style="color:#E6EDF3">         .close </span><span style="color:#FF7B72">=</span></span>
+<span class="line"><span style="color:#E6EDF3">             [</span><span style="color:#79C0FF">this</span><span style="color:#E6EDF3">](</span><span style="color:#FF7B72">auto</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">, </span><span style="color:#FF7B72">int</span><span style="color:#FFA657"> code</span><span style="color:#E6EDF3">, </span><span style="color:#FFA657">std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">string_view</span><span style="color:#FFA657"> msg</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#79C0FF">                 this</span><span style="color:#E6EDF3">-></span><span style="color:#D2A8FF">on_close</span><span style="color:#E6EDF3">(ws, code, msg);</span></span>
+<span class="line"><span style="color:#E6EDF3">             }});</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">    app_.</span><span style="color:#D2A8FF">get</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">"/health"</span><span style="color:#E6EDF3">, [](</span><span style="color:#FF7B72">auto</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">res</span><span style="color:#E6EDF3">, </span><span style="color:#FF7B72">auto</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">req</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#E6EDF3">        res-></span><span style="color:#D2A8FF">writeStatus</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">"200 OK"</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">            -></span><span style="color:#D2A8FF">writeHeader</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">"Content-Type"</span><span style="color:#E6EDF3">, </span><span style="color:#A5D6FF">"application/json"</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">            -></span><span style="color:#D2A8FF">end</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">R"({"status":"healthy"})"</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#E6EDF3">    });</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">void</span><span style="color:#FFA657"> WebSocketServer</span><span style="color:#E6EDF3">::</span><span style="color:#D2A8FF">on_open</span><span style="color:#E6EDF3">(</span><span style="color:#FFA657">WebSocket</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#FF7B72">    auto</span><span style="color:#FF7B72"> *</span><span style="color:#E6EDF3">data </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> ws-></span><span style="color:#D2A8FF">getUserData</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">    data->user_id </span><span style="color:#FF7B72">=</span><span style="color:#FFA657"> std</span><span style="color:#E6EDF3">::</span><span style="color:#D2A8FF">to_string</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">reinterpret_cast&#x3C;uintptr_t></span><span style="color:#E6EDF3">(ws));</span></span>
+<span class="line"><span style="color:#E6EDF3">    data->connected_at </span><span style="color:#FF7B72">=</span></span>
+<span class="line"><span style="color:#FFA657">        std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">chrono</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">system_clock</span><span style="color:#E6EDF3">::</span><span style="color:#D2A8FF">now</span><span style="color:#E6EDF3">().</span><span style="color:#D2A8FF">time_since_epoch</span><span style="color:#E6EDF3">().</span><span style="color:#D2A8FF">count</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFA657">    std</span><span style="color:#E6EDF3">::cout </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "[+] Connection from "</span><span style="color:#FF7B72"> &#x3C;&#x3C;</span><span style="color:#E6EDF3"> data->user_id </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "</span><span style="color:#FF7B72">\n</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">    ws-></span><span style="color:#D2A8FF">send</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">R"({"event":"connected","message":"Welcome!"})"</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#FFA657">             uWS</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">OpCode</span><span style="color:#E6EDF3">::TEXT);</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">void</span><span style="color:#FFA657"> WebSocketServer</span><span style="color:#E6EDF3">::</span><span style="color:#D2A8FF">on_message</span><span style="color:#E6EDF3">(</span><span style="color:#FFA657">WebSocket</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">, </span><span style="color:#FFA657">std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">string_view</span><span style="color:#FFA657"> message</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#FFA657">                                 uWS</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">OpCode</span><span style="color:#FFA657"> op_code</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#FF7B72">    auto</span><span style="color:#FF7B72"> *</span><span style="color:#E6EDF3">data </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> ws-></span><span style="color:#D2A8FF">getUserData</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFA657">    std</span><span style="color:#E6EDF3">::cout </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "[->] Message from "</span><span style="color:#FF7B72"> &#x3C;&#x3C;</span><span style="color:#E6EDF3"> data->user_id </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> ": "</span><span style="color:#FF7B72"> &#x3C;&#x3C;</span><span style="color:#E6EDF3"> message</span></span>
+<span class="line"><span style="color:#FF7B72">              &#x3C;&#x3C;</span><span style="color:#A5D6FF"> "</span><span style="color:#FF7B72">\n</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E">    // Echo it back (you'll want to do something smarter here)</span></span>
+<span class="line"><span style="color:#E6EDF3">    ws-></span><span style="color:#D2A8FF">send</span><span style="color:#E6EDF3">(message, op_code);</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">void</span><span style="color:#FFA657"> WebSocketServer</span><span style="color:#E6EDF3">::</span><span style="color:#D2A8FF">on_close</span><span style="color:#E6EDF3">(</span><span style="color:#FFA657">WebSocket</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">ws</span><span style="color:#E6EDF3">, </span><span style="color:#FF7B72">int</span><span style="color:#FFA657"> code</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#FFA657">                               std</span><span style="color:#E6EDF3">::</span><span style="color:#FFA657">string_view</span><span style="color:#FFA657"> message</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#FF7B72">    auto</span><span style="color:#FF7B72"> *</span><span style="color:#E6EDF3">data </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> ws-></span><span style="color:#D2A8FF">getUserData</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFA657">    std</span><span style="color:#E6EDF3">::cout </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "[-] "</span><span style="color:#FF7B72"> &#x3C;&#x3C;</span><span style="color:#E6EDF3"> data->user_id </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> " disconnected</span><span style="color:#FF7B72">\n</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">void</span><span style="color:#FFA657"> WebSocketServer</span><span style="color:#E6EDF3">::</span><span style="color:#D2A8FF">run</span><span style="color:#E6EDF3">() {</span></span>
+<span class="line"><span style="color:#E6EDF3">    app_.</span><span style="color:#D2A8FF">listen</span><span style="color:#E6EDF3">(port_,</span></span>
+<span class="line"><span style="color:#E6EDF3">                [</span><span style="color:#79C0FF">this</span><span style="color:#E6EDF3">](</span><span style="color:#FF7B72">auto</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">socket</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#FF7B72">                    if</span><span style="color:#E6EDF3"> (socket) {</span></span>
+<span class="line"><span style="color:#FFA657">                        std</span><span style="color:#E6EDF3">::cout </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "</span><span style="color:#FF7B72">\n</span><span style="color:#A5D6FF">WebSocket server listening on port "</span></span>
+<span class="line"><span style="color:#FF7B72">                                  &#x3C;&#x3C;</span><span style="color:#E6EDF3"> port_ </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "</span><span style="color:#FF7B72">\n</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#FFA657">                        std</span><span style="color:#E6EDF3">::cout </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "WSS endpoint: wss://localhost:"</span><span style="color:#FF7B72"> &#x3C;&#x3C;</span><span style="color:#E6EDF3"> port_</span></span>
+<span class="line"><span style="color:#FF7B72">                                  &#x3C;&#x3C;</span><span style="color:#A5D6FF"> "</span><span style="color:#FF7B72">\n</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#FFA657">                        std</span><span style="color:#E6EDF3">::cout </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "Health check: https://localhost:"</span><span style="color:#FF7B72"> &#x3C;&#x3C;</span><span style="color:#E6EDF3"> port_</span></span>
+<span class="line"><span style="color:#FF7B72">                                  &#x3C;&#x3C;</span><span style="color:#A5D6FF"> "/health</span><span style="color:#FF7B72">\n\n</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#E6EDF3">                    } </span><span style="color:#FF7B72">else</span><span style="color:#E6EDF3"> {</span></span>
+<span class="line"><span style="color:#FFA657">                        std</span><span style="color:#E6EDF3">::cerr</span></span>
+<span class="line"><span style="color:#FF7B72">                            &#x3C;&#x3C;</span><span style="color:#A5D6FF"> "webSocket server failed to listen on port "</span></span>
+<span class="line"><span style="color:#FF7B72">                            &#x3C;&#x3C;</span><span style="color:#E6EDF3"> port_ </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#FFA657"> std</span><span style="color:#E6EDF3">::endl;</span></span>
+<span class="line"><span style="color:#FF7B72">                        return</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#E6EDF3">                    }</span></span>
+<span class="line"><span style="color:#E6EDF3">                })</span></span>
+<span class="line"><span style="color:#E6EDF3">        .</span><span style="color:#D2A8FF">run</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <h4 id="breaking-it-down" tabindex="-1">
+                        Breaking It Down
+                    </h4>
+                    <p>
+                        The <strong>constructor</strong> and
+                        <strong><code>run()</code></strong> method are the main
+                        entry points since they’re called directly from
+                        <code>main.cpp</code>.
+                    </p>
+                    <p>
+                        The
+                        <strong>constructor</strong>
+                        (<code>WebSocketServer::WebSocketServer(...)</code>)
+                        uses an initializer list to store the port, key, and
+                        cert paths. More importantly, it initializes the
+                        <code>uWS::SSLApp app_</code> with an options struct<br />
+                        that includes the SSL file paths. After that, it just
+                        calls <code>setup_routes()</code> to configure all
+                        routes.
+                    </p>
+                    <p>
+                        The <strong><code>setup_routes()</code></strong> method
+                        wires everything together:
+                    </p>
+                    <ul>
+                        <li>
+                            It sets up a WebSocket handler for all paths using
+                            <code
+                                >.ws&lt;SocketData&gt;(&quot;/*&quot;,
+                                {...})</code
+                            >.
+                        </li>
+                        <li>
+                            Each event (<code>open</code>, <code>message</code>,
+                            <code>close</code>) is handled by a lambda that
+                            captures <code>this</code>, allowing the callbacks
+                            to call member functions like
+                            <code>this-&gt;on_open(ws)</code>.
+                        </li>
+                        <li>
+                            It also defines a simple HTTP route
+                            <code>/health</code> to verify the server is up and
+                            running.
+                        </li>
+                    </ul>
+                    <p>
+                        Finally, the <strong><code>run()</code></strong> method
+                        does two main things:
+                    </p>
+                    <ol>
+                        <li>
+                            It calls <code>.listen(port_, ...)</code> to bind to
+                            the port. The callback checks whether the bind
+                            succeeded (non-null <code>socket</code>) or failed
+                            (e.g. port in use).
+                        </li>
+                        <li>
+                            It chains <code>.run()</code>, which starts the
+                            server’s main event loop. This call blocks the main
+                            thread and keeps the server running until the
+                            process is terminated (for example, with
+                            <code>Ctrl+C</code>).
+                        </li>
+                    </ol>
+                    <h3 id="step-3-the-entry-point" tabindex="-1">
+                        Step 3: The Entry Point
+                    </h3>
+                    <p>
+                        <strong>Update your <code>src/main.cpp</code>:</strong>
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-cpp"><span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> "include/WebSocketServer.hpp"</span></span>
+<span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> &#x3C;iostream></span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">int</span><span style="color:#D2A8FF"> main</span><span style="color:#E6EDF3">() {</span></span>
+<span class="line"><span style="color:#FF7B72">    constexpr</span><span style="color:#FF7B72"> int</span><span style="color:#E6EDF3"> PORT </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> 7000</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">    try</span><span style="color:#E6EDF3"> {</span></span>
+<span class="line"><span style="color:#E6EDF3">        WebSocketServer </span><span style="color:#D2A8FF">server</span><span style="color:#E6EDF3">(PORT, </span><span style="color:#A5D6FF">"../certs/key.pem"</span><span style="color:#E6EDF3">, </span><span style="color:#A5D6FF">"../certs/cert.pem"</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#E6EDF3">        server.</span><span style="color:#D2A8FF">run</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">    } </span><span style="color:#FF7B72">catch</span><span style="color:#E6EDF3"> (</span><span style="color:#FF7B72">const</span><span style="color:#FFA657"> std</span><span style="color:#E6EDF3">::exception </span><span style="color:#FF7B72">&#x26;</span><span style="color:#E6EDF3">e) {</span></span>
+<span class="line"><span style="color:#FFA657">        std</span><span style="color:#E6EDF3">::cerr </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "Error: "</span><span style="color:#FF7B72"> &#x3C;&#x3C;</span><span style="color:#E6EDF3"> e.</span><span style="color:#D2A8FF">what</span><span style="color:#E6EDF3">() </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#A5D6FF"> "</span><span style="color:#FF7B72">\n</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#FF7B72">        return</span><span style="color:#79C0FF"> 1</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#E6EDF3">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">    return</span><span style="color:#79C0FF"> 0</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <hr />
+                    <h3 id="step-4-build-and-run" tabindex="-1">
+                        Step 4: Build and Run
+                    </h3>
+                    <p>
+                        cmake -S thing if you haven’t yet ran it, otherwise you
+                        can just follow the
+                        <code>cd build &amp;&amp; make</code> command.
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#8B949E"># Build it</span></span>
+<span class="line"><span style="color:#FFA657">cmake</span><span style="color:#79C0FF"> -S</span><span style="color:#A5D6FF"> .</span><span style="color:#79C0FF"> -B</span><span style="color:#A5D6FF"> build</span></span>
+<span class="line"><span style="color:#79C0FF">cd</span><span style="color:#A5D6FF"> build</span><span style="color:#E6EDF3"> &#x26;&#x26; </span><span style="color:#FFA657">make</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># Run it</span></span>
+<span class="line"><span style="color:#FFA657">./websocket_server</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        If you did everything correctly you should see something
+                        like:<br />
+                        You should see:
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-text"><span class="line"><span>✓ WebSocket server listening on port 7000</span></span>
+<span class="line"><span>✓ WSS endpoint: wss://localhost:7000</span></span>
+<span class="line"><span>✓ Health check: https://localhost:7000/health</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        <strong
+                            >Holy shit. You just built a WebSocket server in
+                            C++.</strong
+                        >
+                    </p>
+                    <p>
+                        This is just the surface of what you an do with
+                        µWebSockets.
+                    </p>
+                    <h2 id="step-5-testing-your-websocket-server" tabindex="-1">
+                        Step 5: Testing Your WebSocket Server
+                    </h2>
+                    <p>
+                        Alright, we built it. Time to see if this beast actually
+                        talks.
+                    </p>
+                    <h3 id="option-1-using-wscat" tabindex="-1">
+                        Option 1: Using <code>wscat</code>
+                    </h3>
+                    <p>
+                        If you’ve got Node.js installed, you can use the
+                        <code>wscat</code> CLI to test your<br />
+                        server in seconds.
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#8B949E"># Install wscat globally</span></span>
+<span class="line"><span style="color:#FFA657">npm</span><span style="color:#A5D6FF"> install</span><span style="color:#79C0FF"> -g</span><span style="color:#A5D6FF"> wscat</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># Connect to your server (use --no-check to ignore self-signed certs)</span></span>
+<span class="line"><span style="color:#FFA657">wscat</span><span style="color:#79C0FF"> -c</span><span style="color:#A5D6FF"> wss://localhost:7000</span><span style="color:#79C0FF"> --no-check</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        If everything’s working, you should see something like
+                        this:
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FFA657">connected</span><span style="color:#E6EDF3"> (press </span><span style="color:#A5D6FF">CTRL+C</span><span style="color:#A5D6FF"> to</span><span style="color:#A5D6FF"> quit</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3"> {</span><span style="color:#FFA657">"event"</span><span style="color:#79C0FF">:</span><span style="color:#FFA657">"connected"</span><span style="color:#FFA657">,</span><span style="color:#FFA657">"message"</span><span style="color:#79C0FF">:</span><span style="color:#FFA657">"Welcome!"</span><span style="color:#FFA657">}</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>Now type anything you want:</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FF7B72">></span><span style="color:#E6EDF3"> hello there</span></span>
+<span class="line"><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3"> hello there</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Boom. It echoes back exactly what you sent. That’s your
+                        WebSocket server
+                    </p>
+                    <img
+                        loading="lazy"
+                        decoding="async"
+                        width="1365"
+                        height="739"
+                        alt="Image"
+                        src="https://github.com/user-attachments/assets/c8dcd9ae-a206-4bdb-bdf8-6d352565ba94"
+                    />
+                    <hr />
+                    <h2
+                        id="lessons-learned-aka-things-that-made-me-question-my-life-choices"
+                        tabindex="-1"
+                    >
+                        Lessons Learned (aka: Things That Made Me Question My
+                        Life Choices)
+                    </h2>
+                    <p>
+                        So you’re load-testing your shiny new WebSocket server,
+                        and suddenly…<br />
+                        it dies at ~1015 connections. Every. Single. Time.
+                    </p>
+                    <p>
+                        If this happens, relax. It’s not your code. It’s your
+                        OS.
+                    </p>
+                    <p>
+                        By default, most systems cap the number of open file
+                        descriptors per process (ulimit -n) to around 1024. Each
+                        WebSocket connection eats one.<br />
+                        Do the math.
+                    </p>
+                    <p>fix is simple:</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#8B949E"># Temporary fix (resets on reboot)</span></span>
+<span class="line"><span style="color:#79C0FF">ulimit</span><span style="color:#79C0FF"> -n</span><span style="color:#79C0FF"> 65535</span></span></code></pre>
+
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Fun fact: Node.js’s ws implementation quietly handles
+                        this under the<br />
+                        hood, which is why you’ll see it scale past 5k
+                        connections without<br />
+                        breaking a sweat.<br />
+                        C++ makes you earn that performance the hard way.
+                    </p>
+                    <hr />
+                    <h2 id="wrapping-up" tabindex="-1">Wrapping Up</h2>
+                    <p>
+                        If you made it this far, congratulations, you just built
+                        a fully encrypted,<br />
+                        high-performance WebSocket backend in
+                        <strong>pure C++</strong>.
+                    </p>
+                    <blockquote>
+                        <p>“Why write a backend in C++?”</p>
+                        <p>
+                            Because we can.<br />
+                            And now, <strong>so can you.</strong>
+                        </p>
+                    </blockquote>
+                </div>
+            </article>
+        </div>
+    </body>
+    <script>
+        document.addEventListener("click", async (e) => {
+            const btn = e.target.closest(".copy-btn");
+            if (!btn) return;
+            const wrapper = btn.closest(".code-wrapper");
+            const codeEl = wrapper.querySelector("pre");
+            const code = codeEl.textContent.trim();
+            btn.disabled = true;
+            try {
+                await navigator.clipboard.writeText(code);
+                btn.textContent = "Copied!";
+            } catch (err) {
+                console.error(err);
+                btn.textContent = "Failed";
+            }
+            setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.disabled = false;
+            }, 1500);
+        });
+    </script>
+</html>

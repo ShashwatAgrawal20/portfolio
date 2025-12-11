@@ -1,0 +1,10 @@
+[
+    {
+        "title": "A WebSocket Server in C++ using uWebSocket library.",
+        "slug": "a-websocket-server-in-c-using-uwebsocket-library",
+        "date": "2025-10-22T09:48:00Z",
+        "url": "posts/a-websocket-server-in-c-using-uwebsocket-library.html",
+        "githubUrl": "https://github.com/ShashwatAgrawal20/portfolio/issues/1",
+        "excerpt": "\"Why the fuck would I write a backend service in C++ and not glorious JavaScript?\" Because we can. And we will."
+    }
+]
