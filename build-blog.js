@@ -14,6 +14,20 @@ const JSON_PATH = path.join(__dirname, "blog-posts.json");
 
 let mdRenderer = null;
 
+function extractExcerpt(body) {
+    const intro = body.split(/##\s*table of contents/i)[0];
+    const MAX = 300;
+    let cleaned = intro
+        .replace(/^>\s?/gm, "")
+        .replace(/^#+\s?/gm, "")
+        .replace(/^[-*+]\s+/gm, "")
+        .replace(/`{1,3}[^`]+`{1,3}/g, "")
+        .trim();
+    cleaned = cleaned.replace(/\s+/g, " ");
+    if (cleaned.length > MAX) cleaned = cleaned.slice(0, MAX).trim() + "…";
+    return cleaned;
+}
+
 async function getMarkdownRenderer() {
     if (mdRenderer) return mdRenderer;
 
@@ -105,6 +119,7 @@ async function writePost(post) {
         date: post.created_at,
         url: `posts/${filename}`,
         githubUrl: post.html_url,
+        excerpt: extractExcerpt(post.body),
     };
 }
 
