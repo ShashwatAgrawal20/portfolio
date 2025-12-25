@@ -5,7 +5,7 @@ on:
     types: [edited, closed, labeled, unlabeled]
 
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
@@ -47,5 +47,5 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add posts/ blog-posts.json
           git diff --quiet && git diff --staged --quiet || (
-            git commit -sm "fuck it, shipping it [skip ci]" && git push origin main:gh-pages --force
+            git commit -sm "fuck it, shipping it [skip ci]" && git push origin master:gh-pages --force
           )
