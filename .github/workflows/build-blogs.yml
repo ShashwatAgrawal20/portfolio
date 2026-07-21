@@ -8,12 +8,21 @@ on:
     branches: [master]
   workflow_dispatch:
 
+concurrency:
+  group: blog-build
+  cancel-in-progress: false
+
 jobs:
   build:
+    # Run on push/dispatch always. On issue events: when the issue still has
+    # blog-post, or the label involved is blog-post (covers unlabeled removal).
     if: |
       github.event_name == 'workflow_dispatch' ||
       github.event_name == 'push' ||
-      (github.event.issue && contains(github.event.issue.labels.*.name, 'blog-post'))
+      (github.event_name == 'issues' && (
+        contains(github.event.issue.labels.*.name, 'blog-post') ||
+        github.event.label.name == 'blog-post'
+      ))
 
     runs-on: ubuntu-latest
 
@@ -24,6 +33,16 @@ jobs:
     steps:
       - name: Checkout portfolio repo
         uses: actions/checkout@v4
+
+      - name: Restore published posts from gh-pages
+        run: |
+          git fetch origin gh-pages --depth=1 || true
+          if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
+            git checkout origin/gh-pages -- posts blog-posts.json 2>/dev/null || \
+              echo "No posts/ or blog-posts.json on gh-pages yet"
+          else
+            echo "gh-pages branch not found; first publish will full-build as needed"
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -47,5 +66,5 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add posts/ blog-posts.json
           git diff --quiet && git diff --staged --quiet || (
-            git commit -sm "fuck it, shipping it [skip ci]" && git push origin master:gh-pages --force
+            git commit -sm "fuck it, shipping it [skip ci]" && git push origin HEAD:gh-pages --force
           )

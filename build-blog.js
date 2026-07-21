@@ -15,7 +15,7 @@ const JSON_PATH = path.join(__dirname, "blog-posts.json");
 let mdRenderer = null;
 
 function extractExcerpt(body) {
-    const intro = body.split(/##\s*table of contents/i)[0];
+    const intro = (body || "").split(/##\s*table of contents/i)[0];
     const MAX = 300;
     let cleaned = intro
         .replace(/^>\s?/gm, "")
@@ -35,15 +35,16 @@ async function getMarkdownRenderer() {
         html: true,
         linkify: true,
         typographer: true,
-        breaks: true
+        breaks: true,
     });
 
     md.use(anchor, {
-        slugify: s =>
-            s.toLowerCase()
+        slugify: (s) =>
+            s
+                .toLowerCase()
                 .trim()
                 .replace(/[^\w]+/g, "-")
-                .replace(/^-+|-+$/g, "")
+                .replace(/^-+|-+$/g, ""),
     });
 
     md.use(
@@ -53,7 +54,7 @@ async function getMarkdownRenderer() {
     );
 
     const originalFence = md.renderer.rules.fence;
-    md.renderer.rules.fence = function(...args) {
+    md.renderer.rules.fence = function (...args) {
         const html = originalFence(...args);
 
         return `
@@ -68,9 +69,21 @@ async function getMarkdownRenderer() {
     return mdRenderer;
 }
 
+function getAuthHeaders() {
+    if (!process.env.GITHUB_TOKEN) {
+        console.warn("GITHUB_TOKEN is not set. API requests may be rate-limited.");
+    }
+    return {
+        Authorization: process.env.GITHUB_TOKEN
+            ? `token ${process.env.GITHUB_TOKEN}`
+            : "",
+        "User-Agent": "blog-builder",
+    };
+}
+
 async function fetchBlogPosts() {
     console.log("Fetching all blog posts...");
-    const url = `https://api.github.com/repos/${USERNAME}/${REPO}/issues?labels=${POST_LABEL}&state=open&sort=created&direction=desc`;
+    const url = `https://api.github.com/repos/${USERNAME}/${REPO}/issues?labels=${POST_LABEL}&state=open&sort=created&direction=desc&per_page=100`;
     const response = await fetch(url, { headers: getAuthHeaders() });
     if (!response.ok) throw new Error(`GitHub API error: ${response.statusText}`);
     const posts = await response.json();
@@ -86,41 +99,84 @@ async function fetchSinglePost(issueNumber) {
     return await response.json();
 }
 
-function getAuthHeaders() {
-    if (!process.env.GITHUB_TOKEN) {
-        console.warn("GITHUB_TOKEN is not set. API requests may be rate-limited.");
-    }
-    return {
-        Authorization: process.env.GITHUB_TOKEN
-            ? `token ${process.env.GITHUB_TOKEN}`
-            : "",
-        "User-Agent": "blog-builder",
-    };
+function generateSlug(title) {
+    return (title || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
 }
 
-async function writePost(post) {
+function filenameFor(post) {
+    return `${post.number}-${generateSlug(post.title)}.html`;
+}
+
+function toMeta(post) {
     const slug = generateSlug(post.title);
-    const filename = `${slug}.html`;
-    const filepath = path.join(POSTS_DIR, filename);
-
-    console.log(`Generating: ${filename}`);
-    const rawHtml = await generatePostHTML(post);
-    const lazyimgHtml = rawHtml.replace(/<img(?![^>]*loading=)/g, '<img loading="lazy" decoding="async"');
-    const formattedHtml = await prettier.format(lazyimgHtml, {
-        parser: "html",
-        tabWidth: 4,
-    });
-
-    fs.writeFileSync(filepath, formattedHtml);
-
+    const filename = filenameFor(post);
     return {
+        issueNumber: post.number,
         title: post.title,
-        slug: slug,
+        slug,
         date: post.created_at,
         url: `posts/${filename}`,
         githubUrl: post.html_url,
         excerpt: extractExcerpt(post.body),
     };
+}
+
+function isBlogPost(post) {
+    return (
+        post.state === "open" &&
+        Array.isArray(post.labels) &&
+        post.labels.some((label) => label.name === POST_LABEL)
+    );
+}
+
+function removePostFilesForIssue(issueNumber) {
+    if (!fs.existsSync(POSTS_DIR)) return;
+    const prefix = `${issueNumber}-`;
+    for (const file of fs.readdirSync(POSTS_DIR)) {
+        if (file.startsWith(prefix) && file.endsWith(".html")) {
+            console.log(`Removing: ${file}`);
+            fs.unlinkSync(path.join(POSTS_DIR, file));
+        }
+    }
+}
+
+function pruneOrphanHtml(postsList) {
+    if (!fs.existsSync(POSTS_DIR)) return;
+    const keep = new Set(postsList.map((p) => path.basename(p.url)));
+    for (const file of fs.readdirSync(POSTS_DIR)) {
+        if (!file.endsWith(".html")) continue;
+        if (!keep.has(file)) {
+            console.log(`Pruning orphan: ${file}`);
+            fs.unlinkSync(path.join(POSTS_DIR, file));
+        }
+    }
+}
+
+async function writePost(post) {
+    // Drop prior HTML for this issue (covers title/slug renames).
+    removePostFilesForIssue(post.number);
+
+    const filename = filenameFor(post);
+    const filepath = path.join(POSTS_DIR, filename);
+
+    console.log(`Generating: ${filename}`);
+    const rawHtml = await generatePostHTML(post);
+    const lazyimgHtml = rawHtml.replace(
+        /<img(?![^>]*loading=)/g,
+        '<img loading="lazy" decoding="async"'
+    );
+    const formattedHtml = await prettier.format(lazyimgHtml, {
+        parser: "html",
+        tabWidth: 4,
+    });
+
+    fs.mkdirSync(POSTS_DIR, { recursive: true });
+    fs.writeFileSync(filepath, formattedHtml);
+
+    return toMeta(post);
 }
 
 async function writeBlogJson(postsList) {
@@ -135,9 +191,31 @@ async function writeBlogJson(postsList) {
     fs.writeFileSync(JSON_PATH, formattedJson);
 }
 
+/** Rebuild JSON from API; generate any missing HTML (cheap recovery). */
+async function syncIndexFromApi(options = {}) {
+    const { renderMissing = true } = options;
+    const posts = await fetchBlogPosts();
+    const postsList = [];
+
+    for (const post of posts) {
+        const meta = toMeta(post);
+        postsList.push(meta);
+
+        const filepath = path.join(POSTS_DIR, filenameFor(post));
+        if (renderMissing && !fs.existsSync(filepath)) {
+            console.log(`Missing HTML for #${post.number}, generating...`);
+            await writePost(post);
+        }
+    }
+
+    await writeBlogJson(postsList);
+    pruneOrphanHtml(postsList);
+    return postsList;
+}
+
 async function generatePostHTML(post) {
     const md = await getMarkdownRenderer();
-    const htmlContent = md.render(post.body);
+    const htmlContent = md.render(post.body || "");
     const postDate = new Date(post.created_at).toLocaleString("en-US", {
         year: "numeric",
         month: "long",
@@ -166,7 +244,7 @@ async function generatePostHTML(post) {
                 <h1>${escapeHtml(post.title)}</h1>
                 <div class="post-meta">
                     Posted on ${postDate} •
-                    <a href="${post.html_url}" target="_blank">
+                    <a href="${post.html_url}" target="_blank" rel="noopener noreferrer">
                         Discuss on GitHub
                     </a>
                 </div>
@@ -175,8 +253,7 @@ async function generatePostHTML(post) {
                 </div>
             </article>
         </div>
-    </body>
-    <script>
+        <script>
         document.addEventListener("click", async (e) => {
             const btn = e.target.closest(".copy-btn");
             if (!btn) return;
@@ -196,24 +273,18 @@ async function generatePostHTML(post) {
                 btn.disabled = false;
             }, 1500);
         });
-    </script>
+        </script>
+    </body>
     </html>`;
 }
 
 function escapeHtml(text) {
-    return text
+    return String(text || "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-}
-
-function generateSlug(title) {
-    return title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
 }
 
 async function fullRebuild() {
@@ -233,59 +304,61 @@ async function fullRebuild() {
     }
 
     await writeBlogJson(postsList);
+    pruneOrphanHtml(postsList);
 }
 
-async function incrementalBuild(issueNumber) {
-    console.log(`Starting incremental build for issue #${issueNumber}...`);
+/**
+ * Selective HTML update for one issue. Index always rebuilt from the API.
+ * Expects existing posts/ to be seeded from gh-pages when run in CI.
+ */
+async function selectiveBuild(issueNumber, issueAction) {
+    console.log(
+        `Starting selective build for issue #${issueNumber} (action=${issueAction})...`
+    );
 
-    const post = await fetchSinglePost(issueNumber);
+    fs.mkdirSync(POSTS_DIR, { recursive: true });
 
-    const hasLabel = post.labels.some((label) => label.name === POST_LABEL);
-    if (post.state !== "open" || !hasLabel) {
-        console.log(
-            `Issue #${issueNumber} is not an open blog post. Triggering full rebuild to remove it.`
-        );
-        await fullRebuild();
-        return;
-    }
+    const removing =
+        issueAction === "closed" || issueAction === "unlabeled";
 
-    if (!fs.existsSync(POSTS_DIR)) {
-        fs.mkdirSync(POSTS_DIR, { recursive: true });
-    }
-
-    const newPostMeta = await writePost(post);
-
-    let postsList = [];
-    if (fs.existsSync(JSON_PATH)) {
-        try {
-            postsList = JSON.parse(fs.readFileSync(JSON_PATH, "utf-8"));
-        } catch (e) {
-            console.warn("Could not parse existing blog-posts.json. Rebuilding.");
-            await fullRebuild();
-            return;
+    if (removing) {
+        console.log(`Issue #${issueNumber} removed from blog; deleting HTML.`);
+        removePostFilesForIssue(issueNumber);
+    } else {
+        const post = await fetchSinglePost(issueNumber);
+        if (!isBlogPost(post)) {
+            console.log(
+                `Issue #${issueNumber} is not an open blog post; deleting HTML.`
+            );
+            removePostFilesForIssue(issueNumber);
+        } else {
+            await writePost(post);
         }
     }
 
-    const postIndex = postsList.findIndex((p) => p.slug === newPostMeta.slug);
-    if (postIndex > -1) {
-        postsList[postIndex] = newPostMeta;
-    } else {
-        postsList.push(newPostMeta);
-    }
-
-    await writeBlogJson(postsList);
+    // Full catalog from API (cheap). Fill any missing HTML so index never 404s
+    // after a wipe or first-time seed miss.
+    await syncIndexFromApi({ renderMissing: true });
 }
 
 async function main() {
     const issueNumber = process.env.ISSUE_NUMBER;
     const issueAction = process.env.ISSUE_ACTION;
 
-    const isIncremental =
-        issueNumber && (issueAction === "edited" || issueAction === "labeled");
+    const selectiveActions = new Set([
+        "edited",
+        "labeled",
+        "closed",
+        "unlabeled",
+    ]);
 
-    if (isIncremental) {
-        await incrementalBuild(issueNumber);
+    const useSelective =
+        issueNumber && selectiveActions.has(issueAction);
+
+    if (useSelective) {
+        await selectiveBuild(Number(issueNumber), issueAction);
     } else {
+        // push, workflow_dispatch, or unknown: full rebuild
         await fullRebuild();
     }
 
