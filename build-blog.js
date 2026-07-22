@@ -11,8 +11,10 @@ const REPO = "portfolio";
 const POST_LABEL = "blog-post";
 const SITE_ORIGIN = "https://shashwatagrawal20.github.io/portfolio";
 const OG_IMAGE = `${SITE_ORIGIN}/assets/og/og_image.png`;
+const FEED_URL = `${SITE_ORIGIN}/feed.xml`;
 const POSTS_DIR = path.join(__dirname, "posts");
 const JSON_PATH = path.join(__dirname, "blog-posts.json");
+const FEED_PATH = path.join(__dirname, "feed.xml");
 
 let mdRenderer = null;
 
@@ -209,6 +211,67 @@ async function writePost(post) {
     return toMeta(post);
 }
 
+function escapeXml(text) {
+    return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
+function toRfc822Date(dateInput) {
+    const d = new Date(dateInput);
+    if (Number.isNaN(d.getTime())) return new Date().toUTCString();
+    return d.toUTCString();
+}
+
+function writeRssFeed(postsList) {
+    console.log("Generating feed.xml...");
+    const sorted = [...postsList].sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+    );
+    const lastBuild = sorted.length
+        ? toRfc822Date(sorted[0].date)
+        : new Date().toUTCString();
+
+    const items = sorted
+        .map((post) => {
+            const link = `${SITE_ORIGIN}/${post.url}`;
+            const title = escapeXml(post.title);
+            const description = escapeXml(post.excerpt || post.title || "");
+            const pubDate = toRfc822Date(post.date);
+            const guid = post.issueNumber
+                ? `https://github.com/${USERNAME}/${REPO}/issues/${post.issueNumber}`
+                : link;
+
+            return `    <item>
+      <title>${title}</title>
+      <link>${link}</link>
+      <guid isPermaLink="${post.issueNumber ? "false" : "true"}">${escapeXml(guid)}</guid>
+      <pubDate>${pubDate}</pubDate>
+      <description>${description}</description>
+    </item>`;
+        })
+        .join("\n");
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Shashwat Agrawal</title>
+    <link>${SITE_ORIGIN}/</link>
+    <description>Engineering notes - systems, C, tools, and open source.</description>
+    <language>en-us</language>
+    <lastBuildDate>${lastBuild}</lastBuildDate>
+    <atom:link href="${FEED_URL}" rel="self" type="application/rss+xml"/>
+${items}
+  </channel>
+</rss>
+`;
+
+    fs.writeFileSync(FEED_PATH, xml);
+}
+
 async function writeBlogJson(postsList) {
     console.log("Generating blog-posts.json...");
     postsList.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -219,6 +282,7 @@ async function writeBlogJson(postsList) {
         tabWidth: 4,
     });
     fs.writeFileSync(JSON_PATH, formattedJson);
+    writeRssFeed(postsList);
 }
 
 /** Rebuild JSON from API; generate any missing HTML (cheap recovery). */

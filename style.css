@@ -154,6 +154,20 @@ blockquote {
     margin-top: 40px;
 }
 
+.rss-link {
+    font-size: 0.55em;
+    font-weight: normal;
+    vertical-align: middle;
+    margin-left: 0.35em;
+    color: #6272a4;
+    text-decoration: none;
+}
+
+.rss-link:hover {
+    color: #ff79c6;
+    text-decoration: underline dotted;
+}
+
 /* =================================================================== */
 /* 3b. Experience Section (index.html)
 /* =================================================================== */
