@@ -107,7 +107,8 @@ function generateSlug(title) {
 }
 
 function filenameFor(post) {
-    return `${post.number}-${generateSlug(post.title)}.html`;
+    // Public URL is slug-only; issue number stays in JSON for identity.
+    return `${generateSlug(post.title)}.html`;
 }
 
 function toMeta(post) {
@@ -132,12 +133,39 @@ function isBlogPost(post) {
     );
 }
 
+function loadExistingPostsList() {
+    if (!fs.existsSync(JSON_PATH)) return [];
+    try {
+        return JSON.parse(fs.readFileSync(JSON_PATH, "utf-8"));
+    } catch {
+        return [];
+    }
+}
+
 function removePostFilesForIssue(issueNumber) {
     if (!fs.existsSync(POSTS_DIR)) return;
+
+    // Resolve current path(s) via seeded blog-posts.json (issueNumber → url).
+    for (const entry of loadExistingPostsList()) {
+        if (entry.issueNumber !== issueNumber) continue;
+        const file = entry.url
+            ? path.basename(entry.url)
+            : entry.slug
+              ? `${entry.slug}.html`
+              : null;
+        if (!file) continue;
+        const filepath = path.join(POSTS_DIR, file);
+        if (fs.existsSync(filepath)) {
+            console.log(`Removing: ${file}`);
+            fs.unlinkSync(filepath);
+        }
+    }
+
+    // Clean leftover files from the old `{issueNumber}-{slug}.html` scheme.
     const prefix = `${issueNumber}-`;
     for (const file of fs.readdirSync(POSTS_DIR)) {
         if (file.startsWith(prefix) && file.endsWith(".html")) {
-            console.log(`Removing: ${file}`);
+            console.log(`Removing legacy: ${file}`);
             fs.unlinkSync(path.join(POSTS_DIR, file));
         }
     }
