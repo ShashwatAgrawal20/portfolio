@@ -9,6 +9,8 @@ const anchor = require("markdown-it-anchor");
 const USERNAME = "ShashwatAgrawal20";
 const REPO = "portfolio";
 const POST_LABEL = "blog-post";
+const SITE_ORIGIN = "https://shashwatagrawal20.github.io/portfolio";
+const OG_IMAGE = `${SITE_ORIGIN}/assets/og/og_image.png`;
 const POSTS_DIR = path.join(__dirname, "posts");
 const JSON_PATH = path.join(__dirname, "blog-posts.json");
 
@@ -249,27 +251,54 @@ async function generatePostHTML(post) {
         month: "long",
         day: "numeric",
     });
+    const filename = filenameFor(post);
+    const pageUrl = `${SITE_ORIGIN}/posts/${filename}`;
+    const description = escapeHtml(
+        extractExcerpt(post.body) || post.title || ""
+    );
+    const title = escapeHtml(post.title);
+    const isoDate = post.created_at
+        ? new Date(post.created_at).toISOString()
+        : "";
+
     return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${escapeHtml(post.title)} - Shashwat Agrawal</title>
-        <meta name="description" content="${escapeHtml(post.title)}" />
+        <title>${title} - Shashwat Agrawal</title>
+        <meta name="description" content="${description}" />
+        <meta name="author" content="Shashwat Agrawal" />
+        <link rel="canonical" href="${pageUrl}" />
+
+        <meta property="og:title" content="${title}" />
+        <meta property="og:description" content="${description}" />
+        <meta property="og:image" content="${OG_IMAGE}" />
+        <meta property="og:image:alt" content="${title}" />
+        <meta property="og:url" content="${pageUrl}" />
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="Shashwat Agrawal" />
+        ${isoDate ? `<meta property="article:published_time" content="${isoDate}" />` : ""}
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="${title}" />
+        <meta name="twitter:description" content="${description}" />
+        <meta name="twitter:image" content="${OG_IMAGE}" />
+
         <link rel="apple-touch-icon" sizes="180x180" href="../assets/icons/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
         <link rel="manifest" href="../assets/icons/site.webmanifest">
         <link rel="stylesheet" href="../style.css" />
-        </head>
+    </head>
     <body>
         <div class="container">
             <a href="../index.html" class="back-link">
                 < Back to Portfolio
             </a>
             <article>
-                <h1>${escapeHtml(post.title)}</h1>
+                <h1>${title}</h1>
                 <div class="post-meta">
                     Posted on ${postDate} •
                     <a href="${post.html_url}" target="_blank" rel="noopener noreferrer">
