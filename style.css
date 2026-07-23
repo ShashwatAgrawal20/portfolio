@@ -436,3 +436,108 @@ pre.shiki {
 .copy-btn:active {
     background: #bd93f9;
 }
+
+.post-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 0 24px 0;
+}
+
+.post-action-btn {
+    background: rgba(80, 250, 123, 0.1);
+    border: 1px solid #44475a;
+    color: #50fa7b;
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.post-action-btn:hover {
+    color: #ff79c6;
+    background: rgba(255, 121, 198, 0.1);
+    border-color: #6272a4;
+}
+
+.post-content h1[id],
+.post-content h2[id],
+.post-content h3[id],
+.post-content h4[id] {
+    position: relative;
+}
+
+.post-content h1[id]:hover::after,
+.post-content h2[id]:hover::after,
+.post-content h3[id]:hover::after,
+.post-content h4[id]:hover::after {
+    content: " #";
+    color: #6272a4;
+    font-weight: normal;
+}
+
+.post-content h1[id].heading-copied::after,
+.post-content h2[id].heading-copied::after,
+.post-content h3[id].heading-copied::after,
+.post-content h4[id].heading-copied::after {
+    content: " copied";
+    color: #50fa7b;
+    font-size: 0.7em;
+    font-weight: normal;
+}
+
+.post-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #44475a;
+    flex-wrap: wrap;
+}
+
+.post-nav a {
+    color: #50fa7b;
+    text-decoration: none;
+    max-width: 45%;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+.post-nav a:hover {
+    color: #ff79c6;
+}
+
+.post-nav-next {
+    text-align: right;
+    margin-left: auto;
+}
+
+.back-to-top {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    background: #1a1a2e;
+    border: 1px solid #44475a;
+    color: #50fa7b;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.back-to-top:hover {
+    color: #ff79c6;
+    border-color: #6272a4;
+}

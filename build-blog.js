@@ -15,6 +15,7 @@ const FEED_URL = `${SITE_ORIGIN}/feed.xml`;
 const POSTS_DIR = path.join(__dirname, "posts");
 const JSON_PATH = path.join(__dirname, "blog-posts.json");
 const FEED_PATH = path.join(__dirname, "feed.xml");
+const WORDS_PER_MINUTE = 200;
 
 let mdRenderer = null;
 
@@ -30,6 +31,22 @@ function extractExcerpt(body) {
     cleaned = cleaned.replace(/\s+/g, " ");
     if (cleaned.length > MAX) cleaned = cleaned.slice(0, MAX).trim() + "…";
     return cleaned;
+}
+
+function countWords(body) {
+    const text = String(body || "")
+        .replace(/```[\s\S]*?```/g, " ")
+        .replace(/`[^`]+`/g, " ")
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/[#>*_\-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    if (!text) return 0;
+    return text.split(/\s+/).length;
+}
+
+function readingMinutesFromWords(wordCount) {
+    return Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE));
 }
 
 async function getMarkdownRenderer() {
@@ -49,6 +66,7 @@ async function getMarkdownRenderer() {
                 .trim()
                 .replace(/[^\w]+/g, "-")
                 .replace(/^-+|-+$/g, ""),
+        permalink: false,
     });
 
     md.use(
@@ -60,11 +78,10 @@ async function getMarkdownRenderer() {
     const originalFence = md.renderer.rules.fence;
     md.renderer.rules.fence = function (...args) {
         const html = originalFence(...args);
-
         return `
             <div class="code-wrapper">
                 ${html}
-                <button class="copy-btn">Copy</button>
+                <button type="button" class="copy-btn">Copy</button>
             </div>
         `;
     };
@@ -111,21 +128,24 @@ function generateSlug(title) {
 }
 
 function filenameFor(post) {
-    // Public URL is slug-only; issue number stays in JSON for identity.
     return `${generateSlug(post.title)}.html`;
 }
 
 function toMeta(post) {
     const slug = generateSlug(post.title);
     const filename = filenameFor(post);
+    const wordCount = countWords(post.body);
     return {
         issueNumber: post.number,
         title: post.title,
         slug,
         date: post.created_at,
+        updatedAt: post.updated_at,
         url: `posts/${filename}`,
         githubUrl: post.html_url,
         excerpt: extractExcerpt(post.body),
+        wordCount,
+        readingMinutes: readingMinutesFromWords(wordCount),
     };
 }
 
@@ -149,7 +169,6 @@ function loadExistingPostsList() {
 function removePostFilesForIssue(issueNumber) {
     if (!fs.existsSync(POSTS_DIR)) return;
 
-    // Resolve current path(s) via seeded blog-posts.json (issueNumber → url).
     for (const entry of loadExistingPostsList()) {
         if (entry.issueNumber !== issueNumber) continue;
         const file = entry.url
@@ -165,7 +184,6 @@ function removePostFilesForIssue(issueNumber) {
         }
     }
 
-    // Clean leftover files from the old `{issueNumber}-{slug}.html` scheme.
     const prefix = `${issueNumber}-`;
     for (const file of fs.readdirSync(POSTS_DIR)) {
         if (file.startsWith(prefix) && file.endsWith(".html")) {
@@ -187,15 +205,29 @@ function pruneOrphanHtml(postsList) {
     }
 }
 
+function formatDisplayDate(iso) {
+    return new Date(iso).toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+}
+
+function wasUpdatedAfterCreate(createdAt, updatedAt) {
+    if (!createdAt || !updatedAt) return false;
+    const c = new Date(createdAt).getTime();
+    const u = new Date(updatedAt).getTime();
+    return u - c > 60 * 1000;
+}
+
 async function writePost(post) {
-    // Drop prior HTML for this issue (covers title/slug renames).
     removePostFilesForIssue(post.number);
 
-    const filename = filenameFor(post);
-    const filepath = path.join(POSTS_DIR, filename);
+    const meta = toMeta(post);
+    const filepath = path.join(POSTS_DIR, path.basename(meta.url));
 
-    console.log(`Generating: ${filename}`);
-    const rawHtml = await generatePostHTML(post);
+    console.log(`Generating: ${meta.url}`);
+    const rawHtml = await generatePostHTML(post, meta);
     const lazyimgHtml = rawHtml.replace(
         /<img(?![^>]*loading=)/g,
         '<img loading="lazy" decoding="async"'
@@ -207,8 +239,7 @@ async function writePost(post) {
 
     fs.mkdirSync(POSTS_DIR, { recursive: true });
     fs.writeFileSync(filepath, formattedHtml);
-
-    return toMeta(post);
+    return meta;
 }
 
 function escapeXml(text) {
@@ -232,7 +263,7 @@ function writeRssFeed(postsList) {
         (a, b) => new Date(b.date) - new Date(a.date)
     );
     const lastBuild = sorted.length
-        ? toRfc822Date(sorted[0].date)
+        ? toRfc822Date(sorted[0].updatedAt || sorted[0].date)
         : new Date().toUTCString();
 
     const items = sorted
@@ -285,7 +316,6 @@ async function writeBlogJson(postsList) {
     writeRssFeed(postsList);
 }
 
-/** Rebuild JSON from API; generate any missing HTML (cheap recovery). */
 async function syncIndexFromApi(options = {}) {
     const { renderMissing = true } = options;
     const posts = await fetchBlogPosts();
@@ -307,23 +337,139 @@ async function syncIndexFromApi(options = {}) {
     return postsList;
 }
 
-async function generatePostHTML(post) {
+function postPageScript(meta) {
+    const slugJson = JSON.stringify(meta.slug);
+    return `
+        <script>
+        (function () {
+            const SLUG = ${slugJson};
+
+            document.addEventListener("click", async (e) => {
+                const btn = e.target.closest(".copy-btn");
+                if (!btn) return;
+                const wrapper = btn.closest(".code-wrapper");
+                const codeEl = wrapper && wrapper.querySelector("pre");
+                if (!codeEl) return;
+                const code = codeEl.textContent.trim();
+                btn.disabled = true;
+                try {
+                    await navigator.clipboard.writeText(code);
+                    btn.textContent = "Copied!";
+                } catch (err) {
+                    console.error(err);
+                    btn.textContent = "Failed";
+                }
+                setTimeout(() => {
+                    btn.textContent = "Copy";
+                    btn.disabled = false;
+                }, 1500);
+            });
+
+            const copyLinkBtn = document.getElementById("copy-link-btn");
+            if (copyLinkBtn) {
+                copyLinkBtn.addEventListener("click", async () => {
+                    const url = window.location.href.split("#")[0];
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        copyLinkBtn.textContent = "Copied!";
+                    } catch (err) {
+                        console.error(err);
+                        copyLinkBtn.textContent = "Failed";
+                    }
+                    setTimeout(() => {
+                        copyLinkBtn.textContent = "Copy link";
+                    }, 1500);
+                });
+            }
+
+            document.querySelectorAll(".post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]").forEach((heading) => {
+                heading.style.cursor = "pointer";
+                heading.title = "Click to copy link to this section";
+                heading.addEventListener("click", async (e) => {
+                    if (e.target.closest("a")) return;
+                    const url = window.location.href.split("#")[0] + "#" + heading.id;
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        heading.classList.add("heading-copied");
+                        setTimeout(() => {
+                            heading.classList.remove("heading-copied");
+                        }, 1200);
+                    } catch (err) {
+                        console.error(err);
+                    }
+                });
+            });
+
+            const topBtn = document.getElementById("back-to-top");
+            if (topBtn) {
+                const onScroll = () => {
+                    if (window.scrollY > 400) topBtn.classList.add("visible");
+                    else topBtn.classList.remove("visible");
+                };
+                window.addEventListener("scroll", onScroll, { passive: true });
+                onScroll();
+                topBtn.addEventListener("click", () => {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                });
+            }
+
+            const nav = document.getElementById("post-nav");
+            if (nav) {
+                fetch("../blog-posts.json")
+                    .then((r) => (r.ok ? r.json() : []))
+                    .then((posts) => {
+                        if (!Array.isArray(posts) || !posts.length) return;
+                        const idx = posts.findIndex((p) => p.slug === SLUG);
+                        if (idx < 0) return;
+                        const newer = idx > 0 ? posts[idx - 1] : null;
+                        const older = idx < posts.length - 1 ? posts[idx + 1] : null;
+                        let html = "";
+                        if (older) {
+                            html += '<a class="post-nav-prev" href="../' + older.url + '">&larr; ' + escapeHtml(older.title) + "</a>";
+                        } else {
+                            html += "<span></span>";
+                        }
+                        if (newer) {
+                            html += '<a class="post-nav-next" href="../' + newer.url + '">' + escapeHtml(newer.title) + " &rarr;</a>";
+                        } else {
+                            html += "<span></span>";
+                        }
+                        nav.innerHTML = html;
+                    })
+                    .catch((err) => console.error(err));
+            }
+
+            function escapeHtml(text) {
+                const d = document.createElement("div");
+                d.textContent = text;
+                return d.innerHTML;
+            }
+        })();
+        </script>
+    `;
+}
+
+async function generatePostHTML(post, meta) {
     const md = await getMarkdownRenderer();
     const htmlContent = md.render(post.body || "");
-    const postDate = new Date(post.created_at).toLocaleString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-    const filename = filenameFor(post);
-    const pageUrl = `${SITE_ORIGIN}/posts/${filename}`;
-    const description = escapeHtml(
-        extractExcerpt(post.body) || post.title || ""
-    );
+    const postDate = formatDisplayDate(post.created_at);
+    const updatedDate = formatDisplayDate(post.updated_at);
+    const showUpdated = wasUpdatedAfterCreate(post.created_at, post.updated_at);
+    const pageUrl = `${SITE_ORIGIN}/${meta.url}`;
+    const description = escapeHtml(meta.excerpt || post.title || "");
     const title = escapeHtml(post.title);
     const isoDate = post.created_at
         ? new Date(post.created_at).toISOString()
         : "";
+    const isoUpdated = post.updated_at
+        ? new Date(post.updated_at).toISOString()
+        : "";
+
+    const updatedMeta = showUpdated
+        ? ` · <span class="post-updated">Updated ${updatedDate}</span>`
+        : "";
+    const readingMeta = ` · <span class="post-reading">${meta.readingMinutes} min read</span>`;
+    const wordsMeta = ` · <span class="post-words">${meta.wordCount.toLocaleString("en-US")} words</span>`;
 
     return `
     <!DOCTYPE html>
@@ -344,6 +490,7 @@ async function generatePostHTML(post) {
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="Shashwat Agrawal" />
         ${isoDate ? `<meta property="article:published_time" content="${isoDate}" />` : ""}
+        ${isoUpdated ? `<meta property="article:modified_time" content="${isoUpdated}" />` : ""}
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="${title}" />
@@ -364,37 +511,22 @@ async function generatePostHTML(post) {
             <article>
                 <h1>${title}</h1>
                 <div class="post-meta">
-                    Posted on ${postDate} •
+                    Posted on ${postDate}${updatedMeta}${readingMeta}${wordsMeta} •
                     <a href="${post.html_url}" target="_blank" rel="noopener noreferrer">
                         Discuss on GitHub
                     </a>
+                </div>
+                <div class="post-actions">
+                    <button type="button" class="post-action-btn" id="copy-link-btn">Copy link</button>
                 </div>
                 <div class="post-content">
                     ${htmlContent}
                 </div>
             </article>
+            <nav class="post-nav" id="post-nav" aria-label="Adjacent posts"></nav>
         </div>
-        <script>
-        document.addEventListener("click", async (e) => {
-            const btn = e.target.closest(".copy-btn");
-            if (!btn) return;
-            const wrapper = btn.closest(".code-wrapper");
-            const codeEl = wrapper.querySelector("pre");
-            const code = codeEl.textContent.trim();
-            btn.disabled = true;
-            try {
-                await navigator.clipboard.writeText(code);
-                btn.textContent = "Copied!";
-            } catch (err) {
-                console.error(err);
-                btn.textContent = "Failed";
-            }
-            setTimeout(() => {
-                btn.textContent = "Copy";
-                btn.disabled = false;
-            }, 1500);
-        });
-        </script>
+        <button type="button" id="back-to-top" class="back-to-top" aria-label="Back to top">↑ Top</button>
+        ${postPageScript(meta)}
     </body>
     </html>`;
 }
@@ -420,18 +552,13 @@ async function fullRebuild() {
     const postsList = [];
 
     for (const post of posts) {
-        const postMeta = await writePost(post);
-        postsList.push(postMeta);
+        postsList.push(await writePost(post));
     }
 
     await writeBlogJson(postsList);
     pruneOrphanHtml(postsList);
 }
 
-/**
- * Selective HTML update for one issue. Index always rebuilt from the API.
- * Expects existing posts/ to be seeded from gh-pages when run in CI.
- */
 async function selectiveBuild(issueNumber, issueAction) {
     console.log(
         `Starting selective build for issue #${issueNumber} (action=${issueAction})...`
@@ -457,8 +584,6 @@ async function selectiveBuild(issueNumber, issueAction) {
         }
     }
 
-    // Full catalog from API (cheap). Fill any missing HTML so index never 404s
-    // after a wipe or first-time seed miss.
     await syncIndexFromApi({ renderMissing: true });
 }
 
@@ -479,7 +604,6 @@ async function main() {
     if (useSelective) {
         await selectiveBuild(Number(issueNumber), issueAction);
     } else {
-        // push, workflow_dispatch, or unknown: full rebuild
         await fullRebuild();
     }
 

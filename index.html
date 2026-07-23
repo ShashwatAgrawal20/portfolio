@@ -122,6 +122,56 @@
 
         </div>
         <script>
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text == null ? '' : String(text);
+            return div.innerHTML;
+        }
+
+        function formatDate(iso) {
+            return new Date(iso).toLocaleString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+
+        function wasUpdated(created, updated) {
+            if (!created || !updated) return false;
+            return new Date(updated) - new Date(created) > 60 * 1000;
+        }
+
+        function renderPostCard(post) {
+            const postElement = document.createElement('article');
+            postElement.classList.add('blog-post');
+
+            const postDate = formatDate(post.date);
+            const updatedBit = wasUpdated(post.date, post.updatedAt)
+                ? ' · Updated ' + formatDate(post.updatedAt)
+                : '';
+            const words = typeof post.wordCount === 'number'
+                ? post.wordCount.toLocaleString('en-US')
+                : null;
+            const mins = post.readingMinutes != null
+                ? post.readingMinutes
+                : (typeof post.wordCount === 'number'
+                    ? Math.max(1, Math.ceil(post.wordCount / 200))
+                    : null);
+            const statsParts = [];
+            if (mins != null) statsParts.push(mins + ' min read');
+            if (words != null) statsParts.push(words + ' words');
+            const stats = statsParts.join(' · ');
+
+            postElement.innerHTML =
+                '<h3><a href="' + post.url + '">' + escapeHtml(post.title) + '</a></h3>' +
+                '<div class="blog-post-meta">' +
+                    'Posted on ' + postDate + updatedBit +
+                    (stats ? ' · ' + stats : '') + ' · ' +
+                    '<a href="' + post.githubUrl + '" target="_blank" rel="noopener noreferrer">Discuss on GitHub</a>' +
+                '</div>' +
+                '<p class="blog-post-excerpt">' + escapeHtml(post.excerpt || '') + '</p>' +
+                '<a href="' + post.url + '" class="read-more">Read full post ></a>';
+            return postElement;
+        }
+
         async function loadBlogPosts() {
             const container = document.getElementById('blog-posts-container');
 
@@ -136,43 +186,13 @@
                 }
 
                 container.innerHTML = '';
-
-                posts.forEach(post => {
-                    const postElement = document.createElement('article');
-                    postElement.classList.add('blog-post');
-
-                    const postDate = new Date(post.date).toLocaleString('en-US', {
-                        year: 'numeric', month: 'long', day: 'numeric'
-                    });
-
-                    postElement.innerHTML = `
-                        <h3><a href="${post.url}">${escapeHtml(post.title)}</a></h3>
-                        <div class="blog-post-meta">
-                            Posted on ${postDate} •
-                            <a href="${post.githubUrl}" target="_blank" rel="noopener noreferrer">
-                                Discuss on GitHub
-                            </a>
-                        </div>
-                        <p class="blog-post-excerpt">
-                            ${escapeHtml(post.excerpt || "")}
-                        </p>
-                        <a href="${post.url}" class="read-more">
-                            Read full post >
-                        </a>
-                        `;
-                        container.appendChild(postElement);
+                posts.forEach(function (post) {
+                    container.appendChild(renderPostCard(post));
                 });
-
             } catch (error) {
                 console.error(error);
                 container.innerHTML = '<p>No blog posts yet.</p>';
             }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         document.addEventListener('DOMContentLoaded', loadBlogPosts);
