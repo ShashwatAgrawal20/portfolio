@@ -68,8 +68,21 @@
 
                 <article class="experience-item">
                     <div class="experience-header">
-                        <h3>Open Source Contribution <span class="experience-company">@ Pandas</span></h3>
+                        <h3>Open Source Contribution </h3>
                     </div>
+                    <span class="experience-company">Linux Kernel</span>
+                    <ul>
+                        <li>Worked on an Input synaptics driver patch enabling InterTouch support on the Dell Inspiron 3521 touchpad. <a href="https://lore.kernel.org/all/?q=shashwatagrawal473@gmail.com" target="_blank" rel="noopener noreferrer">[LKML]</a></li>
+                        <li>Patched the comedi ni pcimio driver to correctly set PCI-6220 dio speed and ai fifo depth values per National
+Instruments hardware specs. <a href="https://lore.kernel.org/all/?q=shashwatagrawal473@gmail.com" target="_blank" rel="noopener noreferrer">[LKML]</a></li>
+                        <li>Fixed a PCI resource cleanup bug on the init error path in the NTB EPF driver (drivers/pci), preventing leaked resources on failure. <a href="https://lore.kernel.org/all/?q=shashwatagrawal473@gmail.com" target="_blank" rel="noopener noreferrer">[LKML]</a></li>
+                    </ul>
+                </article>
+
+                <article class="experience-item">
+                    <div class="experience-header">
+                    </div>
+                    <span class="experience-company">Pandas</span>
                     <ul>
                         <li>Refactored <code>format_is_iso</code> by replacing an explicit loop-based ISO datetime check with a compiled regex, reducing Python iteration overhead and improving performance. <a href="https://github.com/pandas-dev/pandas/pull/50468" target="_blank" rel="noopener noreferrer">[PR]</a></li>
                         <li>Fixed incorrect ISO week 53 handling in <code>to_datetime</code>, preventing silent rollover for non-existent ISO weeks, ensuring standards-compliant behavior for ISO calendar years with only 52 weeks, and adding regression tests. <a href="https://github.com/pandas-dev/pandas/pull/60896" target="_blank" rel="noopener noreferrer">[PR]</a></li>
@@ -96,7 +109,7 @@
                             <li><a href="https://github.com/ShashwatAgrawal20/dotfiles" target="_blank" rel="noopener noreferrer">Dotfiles orchestration</a></li>
                         </ul>
                     </li>
-                    <li><strong>OSS Contributor @ Pandas</strong> — perf optimizations, bug fixes, and PDEP-4 docs</li>
+                    <li><strong>OSS Contributor @ Linux Kernel, Pandas</strong></li>
                 </ul>
             </section>
 
