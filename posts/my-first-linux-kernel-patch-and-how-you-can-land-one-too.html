@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            My First Linux Kernel Patch (and How You Can Land One Too) -
+            Shashwat Agrawal
+        </title>
+        <meta
+            name="description"
+            content="One line. One string. Mainline. That&#039;s it. That&#039;s the contribution. And somehow it&#039;s still one of the more satisfying things I&#039;ve shipped."
+        />
+        <meta name="author" content="Shashwat Agrawal" />
+        <link
+            rel="canonical"
+            href="https://shashwatagrawal20.github.io/portfolio/posts/my-first-linux-kernel-patch-and-how-you-can-land-one-too.html"
+        />
+
+        <meta
+            property="og:title"
+            content="My First Linux Kernel Patch (and How You Can Land One Too)"
+        />
+        <meta
+            property="og:description"
+            content="One line. One string. Mainline. That&#039;s it. That&#039;s the contribution. And somehow it&#039;s still one of the more satisfying things I&#039;ve shipped."
+        />
+        <meta
+            property="og:image"
+            content="https://shashwatagrawal20.github.io/portfolio/assets/og/og_image.png"
+        />
+        <meta
+            property="og:image:alt"
+            content="My First Linux Kernel Patch (and How You Can Land One Too)"
+        />
+        <meta
+            property="og:url"
+            content="https://shashwatagrawal20.github.io/portfolio/posts/my-first-linux-kernel-patch-and-how-you-can-land-one-too.html"
+        />
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="Shashwat Agrawal" />
+        <meta
+            property="article:published_time"
+            content="2026-07-21T06:59:21.000Z"
+        />
+        <meta
+            property="article:modified_time"
+            content="2026-07-22T05:28:32.000Z"
+        />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+            name="twitter:title"
+            content="My First Linux Kernel Patch (and How You Can Land One Too)"
+        />
+        <meta
+            name="twitter:description"
+            content="One line. One string. Mainline. That&#039;s it. That&#039;s the contribution. And somehow it&#039;s still one of the more satisfying things I&#039;ve shipped."
+        />
+        <meta
+            name="twitter:image"
+            content="https://shashwatagrawal20.github.io/portfolio/assets/og/og_image.png"
+        />
+
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="../assets/icons/apple-touch-icon.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="../assets/icons/favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="../assets/icons/favicon-16x16.png"
+        />
+        <link rel="manifest" href="../assets/icons/site.webmanifest" />
+        <link rel="stylesheet" href="../style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <a href="../index.html" class="back-link"> < Back to Portfolio </a>
+            <article>
+                <h1>
+                    My First Linux Kernel Patch (and How You Can Land One Too)
+                </h1>
+                <div class="post-meta">
+                    Posted on July 21, 2026 ·
+                    <span class="post-updated">Updated July 22, 2026</span> ·
+                    <span class="post-reading">8 min read</span> ·
+                    <span class="post-words">1,436 words</span> •
+                    <a
+                        href="https://github.com/ShashwatAgrawal20/portfolio/issues/2"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Discuss on GitHub
+                    </a>
+                </div>
+                <div class="post-actions">
+                    <button
+                        type="button"
+                        class="post-action-btn"
+                        id="copy-link-btn"
+                    >
+                        Copy link
+                    </button>
+                </div>
+                <div class="post-content">
+                    <blockquote>
+                        <p>One line. One string. Mainline.</p>
+                    </blockquote>
+                    <p>
+                        That’s it. That’s the contribution. And somehow it’s
+                        still one of the more satisfying things I’ve shipped.
+                    </p>
+                    <h2 id="table-of-contents" tabindex="-1">
+                        Table of Contents
+                    </h2>
+                    <ol>
+                        <li>
+                            <a href="#the-setup-why-the-kernel-felt-impossible"
+                                >The setup: why the kernel felt impossible</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#what-i-actually-landed"
+                                >What I actually landed</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#how-the-bug-showed-up"
+                                >How the bug showed up</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#the-patch-itself">The patch itself</a>
+                        </li>
+                        <li>
+                            <a href="#how-the-hell-do-you-get-started"
+                                >How the hell do you get started</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#finding-something-to-fix"
+                                >Finding something to fix</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#sending-the-patch-the-scary-part"
+                                >Sending the patch (the scary part)</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#what-surprised-me">What surprised me</a>
+                        </li>
+                        <li>
+                            <a href="#resources-that-actually-helped"
+                                >Resources that actually helped</a
+                            >
+                        </li>
+                        <li><a href="#wrapping-up">Wrapping up</a></li>
+                    </ol>
+                    <h2
+                        id="the-setup-why-the-kernel-felt-impossible"
+                        tabindex="-1"
+                    >
+                        The setup: why the kernel felt impossible
+                    </h2>
+                    <p>
+                        For a long time “kernel contribution” sat in the same
+                        mental bucket as “write a compiler” and “touch grass”:
+                        theoretically doable, practically not something people
+                        like me do on a random Tuesday.
+                    </p>
+                    <p>
+                        Then I started compiling my own kernels on Arch. First
+                        with the stock Arch config (bloated as hell, but it
+                        boots). Then with <code>make localmodconfig</code> so
+                        the build only kept modules my machine actually needed.
+                        Builds that took forever. A laptop that cooked itself in
+                        a bag because lid-switch wasn’t wired up in my config.
+                        The usual “I live here now” arc.
+                    </p>
+                    <p>
+                        Once you’re building and booting your own kernel, the
+                        source stops looking like an unreachable cathedral. It
+                        starts looking like a codebase. A huge one. But still a
+                        codebase - with drivers, lists, and bugs that show up on
+                        <em>your</em> hardware.
+                    </p>
+                    <p>That last part is the cheat code.</p>
+                    <h2 id="what-i-actually-landed" tabindex="-1">
+                        What I actually landed
+                    </h2>
+                    <p>In June 2026 I sent (and got merged) this:</p>
+                    <p>
+                        <strong
+                            ><a
+                                href="https://github.com/torvalds/linux/commit/7890fd28fd12b321ccd9e4fdeadbdf9c5ea1be7a"
+                                >Input: synaptics - enable InterTouch on Dell
+                                Inspiron 3521</a
+                            ></strong
+                        >
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Subsystem:</strong> input /
+                            <code>drivers/input/mouse/synaptics.c</code>
+                        </li>
+                        <li>
+                            <strong>Maintainer path:</strong> Dmitry Torokhov’s
+                            input tree → mainline
+                        </li>
+                        <li>
+                            <strong>Diffstat:</strong>
+                            <code>1 file changed, 1 insertion(+)</code>
+                        </li>
+                    </ul>
+                    <p>Yes. One line.</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-c"><span class="line"><span style="color:#A5D6FF">"DLL0597"</span><span style="color:#E6EDF3">,</span><span style="color:#8B949E"> /* Dell Inspiron 3521 */</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Added to <code>smbus_pnp_ids[]</code> under
+                        <code>CONFIG_MOUSE_PS2_SYNAPTICS_SMBUS</code>.
+                    </p>
+                    <p>
+                        That’s not a humble-brag about minimalism. It’s the
+                        point. Kernel work is often <em>not</em> inventing a
+                        scheduler. It’s noticing that your hardware is one
+                        allowlist entry away from working the way the driver
+                        already knows how to make it work.
+                    </p>
+                    <h2 id="how-the-bug-showed-up" tabindex="-1">
+                        How the bug showed up
+                    </h2>
+                    <p>
+                        The Synaptics touchpad on the Dell Inspiron 3521 (PNP ID
+                        <code>DLL0597</code>) advertises InterTouch / SMBus
+                        support. The driver has a path for that. But the PNP ID
+                        wasn’t on the SMBus passlist, so the driver fell back to
+                        PS/2 and helpfully logged a hint along the lines of: try
+                        <code>psmouse.synaptics_intertouch=1</code>.
+                    </p>
+                    <p>
+                        So the capability was there. The code path was there.
+                        The machine just wasn’t on the list of devices allowed
+                        to use it automatically.
+                    </p>
+                    <p>Hardware I verified against:</p>
+                    <ul>
+                        <li>
+                            Dell Inc. Inspiron 3521 (board <code>06RYX8</code>,
+                            BIOS A07)
+                        </li>
+                        <li>Synaptics fw 8.1 / board id 2382</li>
+                        <li>
+                            firmware_id
+                            <code>&quot;PNP: DLL0597 PNP0f13&quot;</code>
+                        </li>
+                    </ul>
+                    <p>
+                        Classic “works if you know the magic module parameter,
+                        broken for everyone else” situation. Perfect first-patch
+                        material.
+                    </p>
+                    <h2 id="the-patch-itself" tabindex="-1">
+                        The patch itself
+                    </h2>
+                    <p>The change is intentionally boring:</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-diff"><span class="line"><span style="color:#E6EDF3"> #ifdef CONFIG_MOUSE_PS2_SYNAPTICS_SMBUS</span></span>
+<span class="line"><span style="color:#E6EDF3"> static const char * const smbus_pnp_ids[] = {</span></span>
+<span class="line"><span style="color:#E6EDF3"> /* all of the topbuttonpad_pnp_ids are valid, we just add some extras */</span></span>
+<span class="line"><span style="color:#7EE787">+"DLL0597", /* Dell Inspiron 3521 */</span></span>
+<span class="line"><span style="color:#E6EDF3"> "DLL060d", /* Dell Precision M3800 */</span></span>
+<span class="line"><span style="color:#E6EDF3"> "LEN0048", /* X1 Carbon 3 */</span></span>
+<span class="line"><span style="color:#E6EDF3"> "LEN0046", /* X250 */</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>What matters more than the diff:</p>
+                    <ol>
+                        <li>
+                            <strong>Reproduced on real hardware</strong> - not a
+                            theoretical reading of the source.
+                        </li>
+                        <li>
+                            <strong>Matched existing patterns</strong> - the
+                            file is full of PNP ID entries with model comments.
+                            Don’t invent a new style; join the list.
+                        </li>
+                        <li>
+                            <strong
+                                >Commit message explains <em>why</em></strong
+                            >
+                            - what the device advertises, what the driver did
+                            without the entry, what the one-line fix does, and
+                            the hardware I tested on.
+                        </li>
+                        <li>
+                            <strong>Went through the right maintainer</strong> -
+                            input subsystem, not a random blast to
+                            <code>linux-kernel@</code>.
+                        </li>
+                    </ol>
+                    <p>Commit message shape (roughly what landed):</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-text"><span class="line"><span>Input: synaptics - enable InterTouch on Dell Inspiron 3521</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>The Synaptics touchpad on Dell Inspiron 3521 (PNP ID DLL0597) advertises</span></span>
+<span class="line"><span>InterTouch / SMBus support, but is not on the SMBus passlist, so the</span></span>
+<span class="line"><span>driver falls back to PS/2 and logs a hint to try</span></span>
+<span class="line"><span>psmouse.synaptics_intertouch=1.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Add DLL0597 to smbus_pnp_ids so InterTouch is enabled automatically on</span></span>
+<span class="line"><span>this model (and other Dells that reuse the same PNP ID).</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Hardware: Dell Inc. Inspiron 3521 (board 06RYX8, BIOS A07),</span></span>
+<span class="line"><span>Synaptics fw 8.1 / board id 2382, firmware_id "PNP: DLL0597 PNP0f13".</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Signed-off-by: Shashwat Agrawal &#x3C;you@example.com></span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        <code>Signed-off-by</code> is not decoration. It’s the
+                        <a href="https://developercertificate.org/"
+                            >Developer’s Certificate of Origin</a
+                        >. You need it.
+                    </p>
+                    <h2 id="how-the-hell-do-you-get-started" tabindex="-1">
+                        How the hell do you get started
+                    </h2>
+                    <p>
+                        Forget “I need to understand the whole kernel.” You
+                        don’t. Nobody does.
+                    </p>
+                    <h3 id="0-prerequisites-that-actually-matter" tabindex="-1">
+                        0. Prerequisites that actually matter
+                    </h3>
+                    <ul>
+                        <li>
+                            Comfortable with C (you don’t need to be a language
+                            lawyer; you need to read driver code without
+                            crying).
+                        </li>
+                        <li>
+                            A Linux machine you can break a little (or a VM, but
+                            hardware bugs need hardware).
+                        </li>
+                        <li>
+                            Git, email setup for <code>git send-email</code> (or
+                            the modern <code>b4</code> workflow).
+                        </li>
+                        <li>
+                            Patience for builds. First full build hurts.
+                            Incremental builds after that are fine.
+                            <code>ccache</code> helps. More cores help more.
+                        </li>
+                    </ul>
+                    <h3 id="1-get-the-source-the-kernel-way" tabindex="-1">
+                        1. Get the source the kernel way
+                    </h3>
+                    <p>
+                        Don’t treat GitHub as the source of truth for sending
+                        patches. Use
+                        <a href="http://kernel.org">kernel.org</a> trees and the
+                        mailing-list workflow.
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#8B949E"># shallow clone is fine to start; deepen later if you need history</span></span>
+<span class="line"><span style="color:#FFA657">git</span><span style="color:#A5D6FF"> clone</span><span style="color:#79C0FF"> --depth=1</span><span style="color:#A5D6FF"> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git</span></span>
+<span class="line"><span style="color:#79C0FF">cd</span><span style="color:#A5D6FF"> linux</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        For subsystem work you’ll eventually want the
+                        maintainer’s tree (for input, that’s Dmitry’s tree) so
+                        you’re not posting against a stale base. For a first
+                        drive-by fix against mainline, starting from Linus’s
+                        tree is okay if you rebase carefully.
+                    </p>
+                    <h3 id="2-build-something-that-boots" tabindex="-1">
+                        2. Build <em>something</em> that boots
+                    </h3>
+                    <p>On a machine you use daily:</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#8B949E"># start from your running config</span></span>
+<span class="line"><span style="color:#FFA657">cp</span><span style="color:#A5D6FF"> /boot/config-</span><span style="color:#E6EDF3">$(</span><span style="color:#FFA657">uname</span><span style="color:#79C0FF"> -r</span><span style="color:#E6EDF3">) </span><span style="color:#A5D6FF">.config</span></span>
+<span class="line"><span style="color:#FFA657">make</span><span style="color:#A5D6FF"> olddefconfig</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># or shrink to what you actually load:</span></span>
+<span class="line"><span style="color:#FFA657">make</span><span style="color:#A5D6FF"> localmodconfig</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFA657">make</span><span style="color:#79C0FF"> -j</span><span style="color:#A5D6FF">"$(</span><span style="color:#FFA657">nproc</span><span style="color:#A5D6FF">)"</span></span>
+<span class="line"><span style="color:#8B949E"># install + reboot path depends on distro; on Arch people often use</span></span>
+<span class="line"><span style="color:#8B949E"># a custom pkg or just install modules + the image carefully</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        If you can boot it, you can test it. If you can test it,
+                        you can fix it.
+                    </p>
+                    <h3
+                        id="3-learn-the-social-layer-before-the-code-layer"
+                        tabindex="-1"
+                    >
+                        3. Learn the social layer before the code layer
+                    </h3>
+                    <p>Kernel process is half code, half culture:</p>
+                    <ul>
+                        <li>
+                            <a
+                                href="https://docs.kernel.org/process/submitting-patches.html"
+                                >Submitting patches</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="https://docs.kernel.org/process/coding-style.html"
+                                >Coding style</a
+                            >
+                            (yes, tabs)
+                        </li>
+                        <li>
+                            <code>scripts/checkpatch.pl</code> on every patch,
+                            every time
+                        </li>
+                        <li>
+                            <code>scripts/get_maintainer.pl</code> so you mail
+                            <em>people</em>, not the void
+                        </li>
+                    </ul>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FFA657">scripts/checkpatch.pl</span><span style="color:#79C0FF"> --strict</span><span style="color:#A5D6FF"> your.patch</span></span>
+<span class="line"><span style="color:#FFA657">scripts/get_maintainer.pl</span><span style="color:#A5D6FF"> your.patch</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>If checkpatch yells, fix it before a human has to.</p>
+                    <h2 id="finding-something-to-fix" tabindex="-1">
+                        Finding something to fix
+                    </h2>
+                    <p>
+                        You do <strong>not</strong> start by emailing “hi I want
+                        to contribute, assign me a task.”
+                    </p>
+                    <p>Good first patches look like:</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kind</th>
+                                <th>Why it works</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Hardware quirk / allowlist entry</td>
+                                <td>
+                                    You have the device; maintainers often don’t
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Obvious bug you hit</td>
+                                <td>Logs, oopses, wrong fallbacks</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Docs / comment fixes that fix
+                                    <em>real</em> confusion
+                                </td>
+                                <td>Small, but only if accurate</td>
+                            </tr>
+                            <tr>
+                                <td>Staging cleanups</td>
+                                <td>More review bandwidth, still real</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>Bad first patches look like:</p>
+                    <ul>
+                        <li>Random drive-by refactors with no bug</li>
+                        <li>“Modernize this whole file” style churn</li>
+                        <li>
+                            Drive-by churn that fights the subsystem’s taste
+                        </li>
+                    </ul>
+                    <p>
+                        My path was the first row:
+                        <strong
+                            >hardware I own + driver that already almost
+                            supported it.</strong
+                        >
+                    </p>
+                    <p>Practical ways to find that:</p>
+                    <ol>
+                        <li>
+                            Read <code>dmesg</code> on your laptop. Drivers
+                            leave breadcrumbs (<code
+                                >please try module_param=1</code
+                            >, “unknown id”, fallback messages).
+                        </li>
+                        <li>
+                            Search the driver for allowlists / quirk tables near
+                            your PNP/USB/DMI IDs.
+                        </li>
+                        <li>
+                            Browse
+                            <a href="https://bugzilla.kernel.org/"
+                                >Kernel Bugzilla</a
+                            >
+                            for hardware you have.
+                        </li>
+                        <li>
+                            Watch the subsystem list for regressions you can
+                            reproduce.
+                        </li>
+                        <li>
+                            Build with extra warnings on code you care about -
+                            sometimes the low-hanging fruit falls out.
+                        </li>
+                    </ol>
+                    <p>When you find a candidate, <strong>prove it</strong>:</p>
+                    <ul>
+                        <li>
+                            Before behavior (logs, photos,
+                            <code>libinput list-devices</code>, whatever
+                            applies)
+                        </li>
+                        <li>After behavior on a kernel with your patch</li>
+                        <li>
+                            Enough hardware detail that someone without your
+                            laptop can still reason about it
+                        </li>
+                    </ul>
+                    <h2 id="sending-the-patch-the-scary-part" tabindex="-1">
+                        Sending the patch (the scary part)
+                    </h2>
+                    <p>High-level flow that worked for me:</p>
+                    <ol>
+                        <li>
+                            <strong>Topic branch</strong> off a recent base.
+                        </li>
+                        <li>
+                            <strong>One logical change per commit.</strong> My
+                            entire fix <em>was</em> one commit. Good.
+                        </li>
+                        <li>
+                            <strong>Commit message</strong> in kernel style:
+                            subsystem prefix, imperative subject, body that
+                            explains problem → approach → testing.
+                        </li>
+                        <li>
+                            <strong><code>checkpatch</code> clean.</strong>
+                        </li>
+                        <li>
+                            <strong>Find maintainers</strong> with
+                            <code>get_maintainer.pl</code>.
+                        </li>
+                        <li>
+                            <strong>Send</strong> with
+                            <code>git send-email</code> (or prepare with
+                            <code>b4</code> / <code>git format-patch</code> and
+                            send properly).
+                        </li>
+                        <li>
+                            <strong>Reply to review.</strong> Don’t vanish.
+                            Don’t take style nits personally.
+                        </li>
+                    </ol>
+                    <p>Minimal <code>git send-email</code> shape:</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FFA657">git</span><span style="color:#A5D6FF"> format-patch</span><span style="color:#79C0FF"> -1</span><span style="color:#79C0FF"> -o</span><span style="color:#A5D6FF"> outgoing/</span></span>
+<span class="line"><span style="color:#FFA657">scripts/checkpatch.pl</span><span style="color:#79C0FF"> --strict</span><span style="color:#A5D6FF"> outgoing/</span><span style="color:#79C0FF">*</span><span style="color:#A5D6FF">.patch</span></span>
+<span class="line"><span style="color:#FFA657">scripts/get_maintainer.pl</span><span style="color:#A5D6FF"> outgoing/</span><span style="color:#79C0FF">*</span><span style="color:#A5D6FF">.patch</span></span>
+<span class="line"><span style="color:#FFA657">git</span><span style="color:#A5D6FF"> send-email</span><span style="color:#79C0FF"> --to=</span><span style="color:#A5D6FF">"maintainer@…"</span><span style="color:#79C0FF"> --cc=</span><span style="color:#A5D6FF">"list@vger.kernel.org"</span><span style="color:#A5D6FF"> outgoing/0001-</span><span style="color:#79C0FF">*</span><span style="color:#A5D6FF">.patch</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        For input, that meant the input maintainer and the
+                        linux-input list - not “email Linus.”
+                    </p>
+                    <p>
+                        After it was accepted into the input tree, it rode the
+                        normal path into mainline. Seeing your name on
+                        <a
+                            href="https://github.com/torvalds/linux/commit/7890fd28fd12b321ccd9e4fdeadbdf9c5ea1be7a"
+                            >torvalds/linux</a
+                        >
+                        hits different than a GitHub PR merge button. Same
+                        dopamine class. Different weight.
+                    </p>
+                    <h2 id="what-surprised-me" tabindex="-1">
+                        What surprised me
+                    </h2>
+                    <p>
+                        <strong>Small is fine.</strong> Maintainers would rather
+                        merge a correct one-line quirk than debate a 400-line
+                        “cleanup.”
+                    </p>
+                    <p>
+                        <strong>Process is the real gate.</strong> Style, SoB,
+                        correct lists, correct base, correct people. The C is
+                        often the easy half.
+                    </p>
+                    <p>
+                        <strong>Your hardware is an unfair advantage.</strong>
+                        Big vendors and big subsystems still miss specific SKUs.
+                        If you own the weird laptop, you can be the person who
+                        makes Linux better on that laptop for everyone after
+                        you.
+                    </p>
+                    <p>
+                        <strong>Review is not hostility.</strong> Short, blunt
+                        review is normal. Fix the thing, resend, move on.
+                    </p>
+                    <p>
+                        <strong
+                            >Building the kernel teaches more than reading blogs
+                            about the kernel.</strong
+                        >
+                        Config pain, module deps, “why won’t suspend work,”
+                        reading <code>dmesg</code> like a stack trace - that’s
+                        the real onboarding.
+                    </p>
+                    <h2 id="resources-that-actually-helped" tabindex="-1">
+                        Resources that actually helped
+                    </h2>
+                    <ul>
+                        <li>
+                            <a href="https://kernelnewbies.org/"
+                                >Kernel Newbies</a
+                            >
+                            - orientation, not cargo cult
+                        </li>
+                        <li>
+                            <a
+                                href="https://docs.kernel.org/process/submitting-patches.html"
+                                >LF docs: submitting patches</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="https://training.linuxfoundation.org/training/a-beginners-guide-to-linux-kernel-development-lfd103/"
+                                >LFD103</a
+                            >
+                            - beginner path if you want structure
+                        </li>
+                        <li>
+                            Subsystem MAINTAINERS file +
+                            <code>get_maintainer.pl</code> - non-negotiable
+                        </li>
+                        <li>
+                            <code>checkpatch.pl</code> - your first reviewer,
+                            free and unemotional
+                        </li>
+                        <li>
+                            <a href="http://lore.kernel.org">lore.kernel.org</a>
+                            archives for the subsystem you care about - read how
+                            people talk before you post
+                        </li>
+                    </ul>
+                    <p>
+                        And unglamorous but real: just compile the damn thing
+                        until boot works. Everything after that is incremental.
+                    </p>
+                    <h2 id="wrapping-up" tabindex="-1">Wrapping up</h2>
+                    <p>
+                        My first kernel contribution was not a new subsystem. It
+                        was a PNP ID string for a Dell touchpad so InterTouch
+                        could turn on without a module parameter.
+                    </p>
+                    <p>
+                        If you’re waiting until you “know enough kernel” to
+                        start: you will wait forever. Pick a machine you own.
+                        Read what its drivers print. Find the allowlist, the
+                        quirk, the off-by-one, the missing <code>static</code>,
+                        the doc that lies. Make the smallest correct change. Run
+                        checkpatch. Mail the right people. Iterate.
+                    </p>
+                    <p>One line is enough to get in the door.</p>
+                    <p>
+                        After that, you already know the path - you just take it
+                        again on a harder bug.
+                    </p>
+                    <hr />
+                    <p>
+                        <strong>Patch:</strong>
+                        <a
+                            href="https://github.com/torvalds/linux/commit/7890fd28fd12b321ccd9e4fdeadbdf9c5ea1be7a"
+                            >7890fd2 - Input: synaptics - enable InterTouch on
+                            Dell Inspiron 3521</a
+                        >
+                    </p>
+                    <p>
+                        If you land something after reading this, I want to hear
+                        about it.
+                    </p>
+                </div>
+            </article>
+            <nav
+                class="post-nav"
+                id="post-nav"
+                aria-label="Adjacent posts"
+            ></nav>
+        </div>
+        <button
+            type="button"
+            id="back-to-top"
+            class="back-to-top"
+            aria-label="Back to top"
+        >
+            ↑ Top
+        </button>
+
+        <script>
+            (function () {
+                const SLUG =
+                    "my-first-linux-kernel-patch-and-how-you-can-land-one-too";
+
+                document.addEventListener("click", async (e) => {
+                    const btn = e.target.closest(".copy-btn");
+                    if (!btn) return;
+                    const wrapper = btn.closest(".code-wrapper");
+                    const codeEl = wrapper && wrapper.querySelector("pre");
+                    if (!codeEl) return;
+                    const code = codeEl.textContent.trim();
+                    btn.disabled = true;
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        btn.textContent = "Copied!";
+                    } catch (err) {
+                        console.error(err);
+                        btn.textContent = "Failed";
+                    }
+                    setTimeout(() => {
+                        btn.textContent = "Copy";
+                        btn.disabled = false;
+                    }, 1500);
+                });
+
+                const copyLinkBtn = document.getElementById("copy-link-btn");
+                if (copyLinkBtn) {
+                    copyLinkBtn.addEventListener("click", async () => {
+                        const url = window.location.href.split("#")[0];
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            copyLinkBtn.textContent = "Copied!";
+                        } catch (err) {
+                            console.error(err);
+                            copyLinkBtn.textContent = "Failed";
+                        }
+                        setTimeout(() => {
+                            copyLinkBtn.textContent = "Copy link";
+                        }, 1500);
+                    });
+                }
+
+                document
+                    .querySelectorAll(
+                        ".post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]",
+                    )
+                    .forEach((heading) => {
+                        heading.style.cursor = "pointer";
+                        heading.title = "Click to copy link to this section";
+                        heading.addEventListener("click", async (e) => {
+                            if (e.target.closest("a")) return;
+                            const url =
+                                window.location.href.split("#")[0] +
+                                "#" +
+                                heading.id;
+                            try {
+                                await navigator.clipboard.writeText(url);
+                                heading.classList.add("heading-copied");
+                                setTimeout(() => {
+                                    heading.classList.remove("heading-copied");
+                                }, 1200);
+                            } catch (err) {
+                                console.error(err);
+                            }
+                        });
+                    });
+
+                const topBtn = document.getElementById("back-to-top");
+                if (topBtn) {
+                    const onScroll = () => {
+                        if (window.scrollY > 400)
+                            topBtn.classList.add("visible");
+                        else topBtn.classList.remove("visible");
+                    };
+                    window.addEventListener("scroll", onScroll, {
+                        passive: true,
+                    });
+                    onScroll();
+                    topBtn.addEventListener("click", () => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    });
+                }
+
+                const nav = document.getElementById("post-nav");
+                if (nav) {
+                    fetch("../blog-posts.json")
+                        .then((r) => (r.ok ? r.json() : []))
+                        .then((posts) => {
+                            if (!Array.isArray(posts) || !posts.length) return;
+                            const idx = posts.findIndex((p) => p.slug === SLUG);
+                            if (idx < 0) return;
+                            const newer = idx > 0 ? posts[idx - 1] : null;
+                            const older =
+                                idx < posts.length - 1 ? posts[idx + 1] : null;
+                            let html = "";
+                            if (older) {
+                                html +=
+                                    '<a class="post-nav-prev" href="../' +
+                                    older.url +
+                                    '">&larr; ' +
+                                    escapeHtml(older.title) +
+                                    "</a>";
+                            } else {
+                                html += "<span></span>";
+                            }
+                            if (newer) {
+                                html +=
+                                    '<a class="post-nav-next" href="../' +
+                                    newer.url +
+                                    '">' +
+                                    escapeHtml(newer.title) +
+                                    " &rarr;</a>";
+                            } else {
+                                html += "<span></span>";
+                            }
+                            nav.innerHTML = html;
+                        })
+                        .catch((err) => console.error(err));
+                }
+
+                function escapeHtml(text) {
+                    const d = document.createElement("div");
+                    d.textContent = text;
+                    return d.innerHTML;
+                }
+            })();
+        </script>
+    </body>
+</html>

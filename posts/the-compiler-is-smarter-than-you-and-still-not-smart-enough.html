@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            The compiler is smarter than you (and still not smart enough) -
+            Shashwat Agrawal
+        </title>
+        <meta
+            name="description"
+            content='Most of your manual micro-opts are cosplay. The optimizer already did the boring version. You just never looked at the assembly. I used to "optimize" C the way people rearrange furniture: move things around, feel productive, never measure the room. Then I started reading what actually emitted. Half…'
+        />
+        <meta name="author" content="Shashwat Agrawal" />
+        <link
+            rel="canonical"
+            href="https://shashwatagrawal20.github.io/portfolio/posts/the-compiler-is-smarter-than-you-and-still-not-smart-enough.html"
+        />
+
+        <meta
+            property="og:title"
+            content="The compiler is smarter than you (and still not smart enough)"
+        />
+        <meta
+            property="og:description"
+            content='Most of your manual micro-opts are cosplay. The optimizer already did the boring version. You just never looked at the assembly. I used to "optimize" C the way people rearrange furniture: move things around, feel productive, never measure the room. Then I started reading what actually emitted. Half…'
+        />
+        <meta
+            property="og:image"
+            content="https://shashwatagrawal20.github.io/portfolio/assets/og/og_image.png"
+        />
+        <meta
+            property="og:image:alt"
+            content="The compiler is smarter than you (and still not smart enough)"
+        />
+        <meta
+            property="og:url"
+            content="https://shashwatagrawal20.github.io/portfolio/posts/the-compiler-is-smarter-than-you-and-still-not-smart-enough.html"
+        />
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="Shashwat Agrawal" />
+        <meta
+            property="article:published_time"
+            content="2026-07-22T16:33:41.000Z"
+        />
+        <meta
+            property="article:modified_time"
+            content="2026-07-22T16:33:41.000Z"
+        />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+            name="twitter:title"
+            content="The compiler is smarter than you (and still not smart enough)"
+        />
+        <meta
+            name="twitter:description"
+            content='Most of your manual micro-opts are cosplay. The optimizer already did the boring version. You just never looked at the assembly. I used to "optimize" C the way people rearrange furniture: move things around, feel productive, never measure the room. Then I started reading what actually emitted. Half…'
+        />
+        <meta
+            name="twitter:image"
+            content="https://shashwatagrawal20.github.io/portfolio/assets/og/og_image.png"
+        />
+
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="../assets/icons/apple-touch-icon.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="../assets/icons/favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="../assets/icons/favicon-16x16.png"
+        />
+        <link rel="manifest" href="../assets/icons/site.webmanifest" />
+        <link rel="stylesheet" href="../style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <a href="../index.html" class="back-link"> < Back to Portfolio </a>
+            <article>
+                <h1>
+                    The compiler is smarter than you (and still not smart
+                    enough)
+                </h1>
+                <div class="post-meta">
+                    Posted on July 22, 2026 ·
+                    <span class="post-reading">6 min read</span> ·
+                    <span class="post-words">1,174 words</span> •
+                    <a
+                        href="https://github.com/ShashwatAgrawal20/portfolio/issues/4"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Discuss on GitHub
+                    </a>
+                </div>
+                <div class="post-actions">
+                    <button
+                        type="button"
+                        class="post-action-btn"
+                        id="copy-link-btn"
+                    >
+                        Copy link
+                    </button>
+                </div>
+                <div class="post-content">
+                    <blockquote>
+                        <p>
+                            Most of your manual micro-opts are cosplay. The
+                            optimizer already did the boring version. You just
+                            never looked at the assembly.
+                        </p>
+                    </blockquote>
+                    <p>
+                        I used to “optimize” C the way people rearrange
+                        furniture: move things around, feel productive, never
+                        measure the room. Then I started reading what
+                        <code>clang -O2</code> actually emitted. Half my
+                        cleverness was already gone. The other half was making
+                        the optimizer’s job <em>harder</em>.
+                    </p>
+                    <p>
+                        This is not “trust the compiler, never think.” It’s the
+                        opposite:
+                        <strong
+                            >the compiler is better than your vibes, and still
+                            terrible at the things you refuse to
+                            measure.</strong
+                        >
+                    </p>
+                    <h2 id="table-of-contents" tabindex="-1">
+                        Table of Contents
+                    </h2>
+                    <ol>
+                        <li><a href="#the-claim">The claim</a></li>
+                        <li>
+                            <a href="#what-smarter-actually-means"
+                                >What “smarter” actually means</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#examples-that-kill-sacred-cows"
+                                >Examples that kill sacred cows</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#where-the-compiler-is-dumb-on-purpose"
+                                >Where the compiler is dumb on purpose</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#ub-not-magic-a-contract-you-signed"
+                                >UB: not magic, a contract you signed</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#a-workflow-that-isnt-cargo-cult"
+                                >A workflow that isn’t cargo cult</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#drive-by-optimized-prs"
+                                >Drive-by “optimized” PRs</a
+                            >
+                        </li>
+                        <li><a href="#wrapping-up">Wrapping up</a></li>
+                    </ol>
+                    <h2 id="the-claim" tabindex="-1">The claim</h2>
+                    <p>
+                        <strong>Write the clear version first.</strong> Turn on
+                        optimizations. Read the asm (or profile). Only then
+                        fight.
+                    </p>
+                    <p>
+                        If you skip the middle steps, you are not engineering.
+                        You are performing intelligence for an audience of one.
+                    </p>
+                    <p>
+                        People get mad at this because it attacks identity: “I
+                        know low-level, therefore I must win against gcc by
+                        hand.” Knowing low-level means you can
+                        <strong>verify</strong>, not that you must reimplement
+                        strength reduction in your head every Tuesday.
+                    </p>
+                    <h2 id="what-smarter-actually-means" tabindex="-1">
+                        What “smarter” actually means
+                    </h2>
+                    <p>
+                        Modern C compilers (GCC/Clang with a normal
+                        <code>-O2</code> / <code>-O3</code>) are extremely good
+                        at:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Algebraic simplification</strong> and
+                            strength reduction (<code>*2</code> vs shift,
+                            multiply by constant, etc.)
+                        </li>
+                        <li>
+                            <strong>Inlining</strong> (when it can see the body)
+                        </li>
+                        <li>
+                            <strong>Dead code elimination</strong> and constant
+                            propagation
+                        </li>
+                        <li>
+                            <strong>Loop idioms</strong> that become
+                            <code>memset</code> / <code>memcpy</code> /
+                            vectorized loops
+                        </li>
+                        <li>
+                            <strong>Common subexpression elimination</strong>
+                        </li>
+                        <li>
+                            <strong>Register allocation</strong> better than
+                            your pet graph coloring on a napkin
+                        </li>
+                    </ul>
+                    <p>
+                        They are <em>not</em> “smart” like a senior engineer who
+                        understands your product. They are smart like a very
+                        fast intern who has memorized every legal transform
+                        under the as-if rule and will apply them ruthlessly.
+                    </p>
+                    <p>
+                        That distinction matters. The compiler optimizes
+                        <strong
+                            >the program you wrote under the language
+                            rules</strong
+                        >. It does not optimize
+                        <strong>the problem you meant</strong>.
+                    </p>
+                    <h2 id="examples-that-kill-sacred-cows" tabindex="-1">
+                        Examples that kill sacred cows
+                    </h2>
+                    <p>
+                        Open
+                        <a href="https://godbolt.org/">Compiler Explorer</a>.
+                        Same flags both sides. I’m not going to paste twenty
+                        screenshots; go break your own myths.
+                    </p>
+                    <h3
+                        id="1-i-ll-multiply-by-shifting-because-it-s-faster"
+                        tabindex="-1"
+                    >
+                        1. “I’ll multiply by shifting because it’s faster”
+                    </h3>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-c"><span class="line"><span style="color:#FF7B72">int</span><span style="color:#D2A8FF"> twice</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">int</span><span style="color:#FFA657"> x</span><span style="color:#E6EDF3">) { </span><span style="color:#FF7B72">return</span><span style="color:#E6EDF3"> x </span><span style="color:#FF7B72">*</span><span style="color:#79C0FF"> 2</span><span style="color:#E6EDF3">; }</span></span>
+<span class="line"><span style="color:#FF7B72">int</span><span style="color:#D2A8FF"> twice_shift</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">int</span><span style="color:#FFA657"> x</span><span style="color:#E6EDF3">) { </span><span style="color:#FF7B72">return</span><span style="color:#E6EDF3"> x </span><span style="color:#FF7B72">&#x3C;&#x3C;</span><span style="color:#79C0FF"> 1</span><span style="color:#E6EDF3">; }</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        At <code>-O2</code>, you often get the same
+                        <code>lea</code>, <code>add</code>, or <code>shl</code>.
+                        The “I used a shift” version is not a personality trait.
+                        It’s noise.
+                    </p>
+                    <h3
+                        id="2-manual-loops-beat-library-memory-ops"
+                        tabindex="-1"
+                    >
+                        2. “Manual loops beat library memory ops”
+                    </h3>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-c"><span class="line"><span style="color:#FF7B72">void</span><span style="color:#D2A8FF"> clear</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">char</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">p</span><span style="color:#E6EDF3">, </span><span style="color:#FF7B72">int</span><span style="color:#FFA657"> n</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#FF7B72">    for</span><span style="color:#E6EDF3"> (</span><span style="color:#FF7B72">int</span><span style="color:#E6EDF3"> i </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> 0</span><span style="color:#E6EDF3">; i </span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3"> n; i</span><span style="color:#FF7B72">++</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#FFA657">        p</span><span style="color:#E6EDF3">[i] </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> 0</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Compilers routinely recognize this and emit something
+                        that smells like <code>memset</code> or a vectorized
+                        clear <em>when it’s legal</em>. Your hand-rolled byte
+                        loop is not automatically virtuous. Sometimes it’s worse
+                        because you blocked a pattern match with “clever”
+                        indexing.
+                    </p>
+                    <h3 id="3-inline-means-it-will-inline" tabindex="-1">
+                        3. “<code>inline</code> means it will inline”
+                    </h3>
+                    <p>
+                        <code>inline</code> is a suggestion soaked in linkage
+                        history. Without LTO, the compiler can only inline what
+                        it can <strong>see</strong>. Your header-only
+                        discipline, your unity builds, your LTO flags - those
+                        matter more than the keyword cosplay.
+                    </p>
+                    <h3 id="4-branchless-is-always-faster" tabindex="-1">
+                        4. “Branchless is always faster”
+                    </h3>
+                    <p>
+                        Branchless code can win. It can also lose. Mispredicted
+                        branches are expensive; so is a long dependency chain of
+                        cmovs on a hot path that predicted fine.
+                        <strong
+                            >You don’t know until you measure that path on that
+                            CPU.</strong
+                        >
+                    </p>
+                    <h3
+                        id="5-the-one-that-hurts-you-optimized-and-regressed"
+                        tabindex="-1"
+                    >
+                        5. The one that hurts: you “optimized” and regressed
+                    </h3>
+                    <p>Classic failure mode:</p>
+                    <ul>
+                        <li>
+                            hoist something into a global or
+                            <code>volatile</code> “to be safe”
+                        </li>
+                        <li>
+                            add <code>asm</code> barriers because a blog said so
+                        </li>
+                        <li>
+                            rewrite a clean loop into pointer soup so
+                            <em>you</em> feel closer to the metal
+                        </li>
+                    </ul>
+                    <p>
+                        Suddenly the compiler cannot prove non-aliasing, cannot
+                        vectorize, cannot eliminate temps. You got more
+                        “control” and less speed. Congratulations: you won the
+                        argument and lost the cycle budget.
+                    </p>
+                    <h2
+                        id="where-the-compiler-is-dumb-on-purpose"
+                        tabindex="-1"
+                    >
+                        Where the compiler is dumb on purpose
+                    </h2>
+                    <p>
+                        This is the half people skip, and it’s why “just trust
+                        -O3” is also cope.
+                    </p>
+                    <h3 id="it-cannot-see-across-the-universe" tabindex="-1">
+                        It cannot see across the universe
+                    </h3>
+                    <ul>
+                        <li>
+                            Separate TUs without LTO: no inlining, weaker
+                            devirtualization-like outcomes for function pointers
+                        </li>
+                        <li>Shared libraries and PLT boundaries</li>
+                        <li>
+                            Calls into code you didn’t compile (libc is often
+                            fine; your plugin ABI is not free)
+                        </li>
+                    </ul>
+                    <h3 id="it-must-respect-concurrency-and-i-o" tabindex="-1">
+                        It must respect concurrency and I/O
+                    </h3>
+                    <ul>
+                        <li>
+                            <strong>Syscalls</strong>, atomics,
+                            <code>volatile</code> (for MMIO, not for “threading
+                            vibes”)
+                        </li>
+                        <li>
+                            Anything that can be observed by another thread or
+                            the kernel
+                        </li>
+                    </ul>
+                    <p>
+                        If you wanted the compiler to invent a lock-free
+                        protocol from a racy program, you wanted a different
+                        profession.
+                    </p>
+                    <h3 id="it-is-not-a-profiler" tabindex="-1">
+                        It is not a profiler
+                    </h3>
+                    <p>
+                        It optimizes local transforms. It does not know your P99
+                        latency under load, your disk, your NUMA node, or that
+                        this function runs once at startup.
+                        <strong>Hotness is on you.</strong>
+                    </p>
+                    <h3
+                        id="it-believes-your-types-and-your-ub-free-story"
+                        tabindex="-1"
+                    >
+                        It believes your types and your UB-free story
+                    </h3>
+                    <p>
+                        If you lie (strict aliasing, out-of-bounds, data races),
+                        “smart” becomes “nasal demons” at <code>-O2</code>.
+                        That’s not the compiler being evil. That’s you voiding
+                        the warranty and being surprised the car is fast.
+                    </p>
+                    <h2 id="ub-not-magic-a-contract-you-signed" tabindex="-1">
+                        UB: not magic, a contract you signed
+                    </h2>
+                    <p>
+                        People love to say “the compiler is too aggressive.”
+                        Often the program was never defined.
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-c"><span class="line"><span style="color:#8B949E">// Don't do this. Illustrative only.</span></span>
+<span class="line"><span style="color:#FF7B72">int</span><span style="color:#D2A8FF"> f</span><span style="color:#E6EDF3">(</span><span style="color:#FF7B72">int</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">a</span><span style="color:#E6EDF3">, </span><span style="color:#FF7B72">long</span><span style="color:#FF7B72"> *</span><span style="color:#FFA657">b</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#FF7B72">    *</span><span style="color:#E6EDF3">a </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> 1</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#FF7B72">    *</span><span style="color:#E6EDF3">b </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> 2</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#FF7B72">    return</span><span style="color:#FF7B72"> *</span><span style="color:#E6EDF3">a;</span><span style="color:#8B949E"> // what if a and b alias? language says they don't via effective type rules</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        If you needed that alias, you needed
+                        <code>char *</code>, <code>memcpy</code>, or a union
+                        with defined rules - not vibes.
+                    </p>
+                    <p>
+                        <strong>Rule:</strong> if your optimization requires UB,
+                        it is not an optimization. It is a timed bomb that
+                        passes tests on -O0.
+                    </p>
+                    <h2 id="a-workflow-that-isn-t-cargo-cult" tabindex="-1">
+                        A workflow that isn’t cargo cult
+                    </h2>
+                    <ol>
+                        <li>
+                            <strong>Correct clear code</strong> (yes, really)
+                        </li>
+                        <li>
+                            <strong
+                                ><code>-O2</code> (or your project’s real
+                                flags)</strong
+                            >
+                            - match production
+                        </li>
+                        <li>
+                            <strong>Profile</strong> (<code>perf</code>,
+                            counters, a simple timer on the hot loop -
+                            something)
+                        </li>
+                        <li>
+                            <strong>Read asm</strong> for the hot function only
+                            (<code>godbolt</code>, <code>objdump -d</code>,
+                            Compiler Explorer diff)
+                        </li>
+                        <li><strong>Change one thing</strong>, remeasure</li>
+                        <li>
+                            <strong
+                                >Keep the change only if the number
+                                moves</strong
+                            >
+                            in the direction you care about
+                        </li>
+                    </ol>
+                    <p>
+                        If you cannot explain the asm delta, you are not allowed
+                        to call it an optimization in code review. You can call
+                        it a refactor. Different word. Different pride.
+                    </p>
+                    <p>Useful flags to know exist (project-dependent):</p>
+                    <ul>
+                        <li>
+                            <code>-O2</code> / <code>-O3</code> /
+                            <code>-Os</code>
+                        </li>
+                        <li>
+                            <code>-flto</code> when you actually want cross-TU
+                            reality
+                        </li>
+                        <li>
+                            <code>-fno-strict-aliasing</code> is not a
+                            personality; it’s a confession
+                        </li>
+                        <li>
+                            sanitizers
+                            (<code>-fsanitize=address,undefined</code>) before
+                            you brag about speed
+                        </li>
+                    </ul>
+                    <h2 id="drive-by-optimized-prs" tabindex="-1">
+                        Drive-by “optimized” PRs
+                    </h2>
+                    <p>If you contribute to OSS (you should), stop sending:</p>
+                    <ul>
+                        <li>“micro-optimized” patches with no benchmark</li>
+                        <li>
+                            renames of <code>i</code> to <code>idx</code> in the
+                            name of performance
+                        </li>
+                        <li>
+                            “I replaced this with intrinsics” without a host CPU
+                            story
+                        </li>
+                    </ul>
+                    <p>
+                        Maintainers have seen a thousand of these. The ones that
+                        land look like:
+                    </p>
+                    <ul>
+                        <li>before/after numbers</li>
+                        <li>asm or perf note when relevant</li>
+                        <li>clear code still clear</li>
+                        <li>no UB fanfiction</li>
+                    </ul>
+                    <p>
+                        Boring, measured patches get merged. Clever cosplay gets
+                        “thanks, closing.”
+                    </p>
+                    <h2 id="wrapping-up" tabindex="-1">Wrapping up</h2>
+                    <p>
+                        The compiler is smarter than you at
+                        <strong>local, legal, mechanical transforms</strong
+                        >.<br />
+                        You are smarter than the compiler at
+                        <strong
+                            >problem choice, data layout, algorithms,
+                            concurrency design, and what “fast” means for
+                            users</strong
+                        >.
+                    </p>
+                    <p>Act like it:</p>
+                    <ul>
+                        <li>Don’t hand-compete with strength reduction.</li>
+                        <li>
+                            Do own layout, allocation strategy, batching,
+                            syscalls, and profiles.
+                        </li>
+                        <li>
+                            When you fight the optimizer, bring assembly and
+                            numbers, not folklore.
+                        </li>
+                    </ul>
+                    <p>
+                        If this made you angry, good. Open Compiler Explorer,
+                        paste the function you’re proudest of, and check whether
+                        <code>-O2</code> already did your personality for you.
+                    </p>
+                    <p>
+                        If it already did: delete the clever version. Keep the
+                        clear one. Ship.
+                    </p>
+                    <hr />
+                    <p>
+                        <strong>Homework:</strong> take one function you
+                        “optimized” last year. Godbolt it at <code>-O0</code> vs
+                        <code>-O2</code>. If the lesson doesn’t sting a little,
+                        pick a hotter function.
+                    </p>
+                </div>
+            </article>
+            <nav
+                class="post-nav"
+                id="post-nav"
+                aria-label="Adjacent posts"
+            ></nav>
+        </div>
+        <button
+            type="button"
+            id="back-to-top"
+            class="back-to-top"
+            aria-label="Back to top"
+        >
+            ↑ Top
+        </button>
+
+        <script>
+            (function () {
+                const SLUG =
+                    "the-compiler-is-smarter-than-you-and-still-not-smart-enough";
+
+                document.addEventListener("click", async (e) => {
+                    const btn = e.target.closest(".copy-btn");
+                    if (!btn) return;
+                    const wrapper = btn.closest(".code-wrapper");
+                    const codeEl = wrapper && wrapper.querySelector("pre");
+                    if (!codeEl) return;
+                    const code = codeEl.textContent.trim();
+                    btn.disabled = true;
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        btn.textContent = "Copied!";
+                    } catch (err) {
+                        console.error(err);
+                        btn.textContent = "Failed";
+                    }
+                    setTimeout(() => {
+                        btn.textContent = "Copy";
+                        btn.disabled = false;
+                    }, 1500);
+                });
+
+                const copyLinkBtn = document.getElementById("copy-link-btn");
+                if (copyLinkBtn) {
+                    copyLinkBtn.addEventListener("click", async () => {
+                        const url = window.location.href.split("#")[0];
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            copyLinkBtn.textContent = "Copied!";
+                        } catch (err) {
+                            console.error(err);
+                            copyLinkBtn.textContent = "Failed";
+                        }
+                        setTimeout(() => {
+                            copyLinkBtn.textContent = "Copy link";
+                        }, 1500);
+                    });
+                }
+
+                document
+                    .querySelectorAll(
+                        ".post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]",
+                    )
+                    .forEach((heading) => {
+                        heading.style.cursor = "pointer";
+                        heading.title = "Click to copy link to this section";
+                        heading.addEventListener("click", async (e) => {
+                            if (e.target.closest("a")) return;
+                            const url =
+                                window.location.href.split("#")[0] +
+                                "#" +
+                                heading.id;
+                            try {
+                                await navigator.clipboard.writeText(url);
+                                heading.classList.add("heading-copied");
+                                setTimeout(() => {
+                                    heading.classList.remove("heading-copied");
+                                }, 1200);
+                            } catch (err) {
+                                console.error(err);
+                            }
+                        });
+                    });
+
+                const topBtn = document.getElementById("back-to-top");
+                if (topBtn) {
+                    const onScroll = () => {
+                        if (window.scrollY > 400)
+                            topBtn.classList.add("visible");
+                        else topBtn.classList.remove("visible");
+                    };
+                    window.addEventListener("scroll", onScroll, {
+                        passive: true,
+                    });
+                    onScroll();
+                    topBtn.addEventListener("click", () => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    });
+                }
+
+                const nav = document.getElementById("post-nav");
+                if (nav) {
+                    fetch("../blog-posts.json")
+                        .then((r) => (r.ok ? r.json() : []))
+                        .then((posts) => {
+                            if (!Array.isArray(posts) || !posts.length) return;
+                            const idx = posts.findIndex((p) => p.slug === SLUG);
+                            if (idx < 0) return;
+                            const newer = idx > 0 ? posts[idx - 1] : null;
+                            const older =
+                                idx < posts.length - 1 ? posts[idx + 1] : null;
+                            let html = "";
+                            if (older) {
+                                html +=
+                                    '<a class="post-nav-prev" href="../' +
+                                    older.url +
+                                    '">&larr; ' +
+                                    escapeHtml(older.title) +
+                                    "</a>";
+                            } else {
+                                html += "<span></span>";
+                            }
+                            if (newer) {
+                                html +=
+                                    '<a class="post-nav-next" href="../' +
+                                    newer.url +
+                                    '">' +
+                                    escapeHtml(newer.title) +
+                                    " &rarr;</a>";
+                            } else {
+                                html += "<span></span>";
+                            }
+                            nav.innerHTML = html;
+                        })
+                        .catch((err) => console.error(err));
+                }
+
+                function escapeHtml(text) {
+                    const d = document.createElement("div");
+                    d.textContent = text;
+                    return d.innerHTML;
+                }
+            })();
+        </script>
+    </body>
+</html>

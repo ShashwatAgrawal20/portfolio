@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Shashwat Agrawal</title>
+    <link>https://shashwatagrawal20.github.io/portfolio/</link>
+    <description>Engineering notes - systems, C, tools, and open source.</description>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 23 Jul 2026 07:01:11 GMT</lastBuildDate>
+    <atom:link href="https://shashwatagrawal20.github.io/portfolio/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>I publish from GitHub issues and your CMS is theater</title>
+      <link>https://shashwatagrawal20.github.io/portfolio/posts/i-publish-from-github-issues-and-your-cms-is-theater.html</link>
+      <guid isPermaLink="false">https://github.com/ShashwatAgrawal20/portfolio/issues/5</guid>
+      <pubDate>Thu, 23 Jul 2026 07:01:11 GMT</pubDate>
+      <description>If your &quot;blog stack&quot; needs a database, a theme marketplace, and a plugin that updates itself into a security advisory, you didn&apos;t pick tools. You hired a second job. I publish from **GitHub issues**. Not as a bit. Not as a prototype I mean to replace with Ghost &quot;when I have time.&quot; As the actual pipe…</description>
+    </item>
+    <item>
+      <title>The compiler is smarter than you (and still not smart enough)</title>
+      <link>https://shashwatagrawal20.github.io/portfolio/posts/the-compiler-is-smarter-than-you-and-still-not-smart-enough.html</link>
+      <guid isPermaLink="false">https://github.com/ShashwatAgrawal20/portfolio/issues/4</guid>
+      <pubDate>Wed, 22 Jul 2026 16:33:41 GMT</pubDate>
+      <description>Most of your manual micro-opts are cosplay. The optimizer already did the boring version. You just never looked at the assembly. I used to &quot;optimize&quot; C the way people rearrange furniture: move things around, feel productive, never measure the room. Then I started reading what actually emitted. Half…</description>
+    </item>
+    <item>
+      <title>tec.h: header-only testing for C (and C++) without the ceremony</title>
+      <link>https://shashwatagrawal20.github.io/portfolio/posts/tec-h-header-only-testing-for-c-and-c-without-the-ceremony.html</link>
+      <guid isPermaLink="false">https://github.com/ShashwatAgrawal20/portfolio/issues/3</guid>
+      <pubDate>Wed, 22 Jul 2026 05:57:58 GMT</pubDate>
+      <description>Drop one header in. Write a test. Compile. Run. That&apos;s the whole product. I got tired of unit testing in C feeling like a side quest with its own build system, package manager, and personality. So I wrote [tec.h](https://github.com/ShashwatAgrawal20/tec.h).</description>
+    </item>
+    <item>
+      <title>My First Linux Kernel Patch (and How You Can Land One Too)</title>
+      <link>https://shashwatagrawal20.github.io/portfolio/posts/my-first-linux-kernel-patch-and-how-you-can-land-one-too.html</link>
+      <guid isPermaLink="false">https://github.com/ShashwatAgrawal20/portfolio/issues/2</guid>
+      <pubDate>Tue, 21 Jul 2026 06:59:21 GMT</pubDate>
+      <description>One line. One string. Mainline. That&apos;s it. That&apos;s the contribution. And somehow it&apos;s still one of the more satisfying things I&apos;ve shipped.</description>
+    </item>
+    <item>
+      <title>A WebSocket Server in C++ using uWebSocket library.</title>
+      <link>https://shashwatagrawal20.github.io/portfolio/posts/a-websocket-server-in-c-using-uwebsocket-library.html</link>
+      <guid isPermaLink="false">https://github.com/ShashwatAgrawal20/portfolio/issues/1</guid>
+      <pubDate>Wed, 22 Oct 2025 09:48:00 GMT</pubDate>
+      <description>&quot;Why the fuck would I write a backend service in C++ and not glorious JavaScript?&quot; Because we can. And we will.</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,62 @@
+[
+    {
+        "issueNumber": 5,
+        "title": "I publish from GitHub issues and your CMS is theater",
+        "slug": "i-publish-from-github-issues-and-your-cms-is-theater",
+        "date": "2026-07-23T07:01:11Z",
+        "updatedAt": "2026-07-23T07:01:11Z",
+        "url": "posts/i-publish-from-github-issues-and-your-cms-is-theater.html",
+        "githubUrl": "https://github.com/ShashwatAgrawal20/portfolio/issues/5",
+        "excerpt": "If your \"blog stack\" needs a database, a theme marketplace, and a plugin that updates itself into a security advisory, you didn't pick tools. You hired a second job. I publish from **GitHub issues**. Not as a bit. Not as a prototype I mean to replace with Ghost \"when I have time.\" As the actual pipe…",
+        "wordCount": 1055,
+        "readingMinutes": 6
+    },
+    {
+        "issueNumber": 4,
+        "title": "The compiler is smarter than you (and still not smart enough)",
+        "slug": "the-compiler-is-smarter-than-you-and-still-not-smart-enough",
+        "date": "2026-07-22T16:33:41Z",
+        "updatedAt": "2026-07-22T16:33:41Z",
+        "url": "posts/the-compiler-is-smarter-than-you-and-still-not-smart-enough.html",
+        "githubUrl": "https://github.com/ShashwatAgrawal20/portfolio/issues/4",
+        "excerpt": "Most of your manual micro-opts are cosplay. The optimizer already did the boring version. You just never looked at the assembly. I used to \"optimize\" C the way people rearrange furniture: move things around, feel productive, never measure the room. Then I started reading what actually emitted. Half…",
+        "wordCount": 1174,
+        "readingMinutes": 6
+    },
+    {
+        "issueNumber": 3,
+        "title": "tec.h: header-only testing for C (and C++) without the ceremony",
+        "slug": "tec-h-header-only-testing-for-c-and-c-without-the-ceremony",
+        "date": "2026-07-22T05:57:58Z",
+        "updatedAt": "2026-07-22T05:57:58Z",
+        "url": "posts/tec-h-header-only-testing-for-c-and-c-without-the-ceremony.html",
+        "githubUrl": "https://github.com/ShashwatAgrawal20/portfolio/issues/3",
+        "excerpt": "Drop one header in. Write a test. Compile. Run. That's the whole product. I got tired of unit testing in C feeling like a side quest with its own build system, package manager, and personality. So I wrote [tec.h](https://github.com/ShashwatAgrawal20/tec.h).",
+        "wordCount": 1162,
+        "readingMinutes": 6
+    },
+    {
+        "issueNumber": 2,
+        "title": "My First Linux Kernel Patch (and How You Can Land One Too)",
+        "slug": "my-first-linux-kernel-patch-and-how-you-can-land-one-too",
+        "date": "2026-07-21T06:59:21Z",
+        "updatedAt": "2026-07-22T05:28:32Z",
+        "url": "posts/my-first-linux-kernel-patch-and-how-you-can-land-one-too.html",
+        "githubUrl": "https://github.com/ShashwatAgrawal20/portfolio/issues/2",
+        "excerpt": "One line. One string. Mainline. That's it. That's the contribution. And somehow it's still one of the more satisfying things I've shipped.",
+        "wordCount": 1436,
+        "readingMinutes": 8
+    },
+    {
+        "issueNumber": 1,
+        "title": "A WebSocket Server in C++ using uWebSocket library.",
+        "slug": "a-websocket-server-in-c-using-uwebsocket-library",
+        "date": "2025-10-22T09:48:00Z",
+        "updatedAt": "2025-12-10T15:42:45Z",
+        "url": "posts/a-websocket-server-in-c-using-uwebsocket-library.html",
+        "githubUrl": "https://github.com/ShashwatAgrawal20/portfolio/issues/1",
+        "excerpt": "\"Why the fuck would I write a backend service in C++ and not glorious JavaScript?\" Because we can. And we will.",
+        "wordCount": 1301,
+        "readingMinutes": 7
+    }
+]

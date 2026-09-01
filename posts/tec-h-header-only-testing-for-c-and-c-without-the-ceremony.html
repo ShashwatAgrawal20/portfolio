@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            tec.h: header-only testing for C (and C++) without the ceremony -
+            Shashwat Agrawal
+        </title>
+        <meta
+            name="description"
+            content="Drop one header in. Write a test. Compile. Run. That&#039;s the whole product. I got tired of unit testing in C feeling like a side quest with its own build system, package manager, and personality. So I wrote [tec.h](https://github.com/ShashwatAgrawal20/tec.h)."
+        />
+        <meta name="author" content="Shashwat Agrawal" />
+        <link
+            rel="canonical"
+            href="https://shashwatagrawal20.github.io/portfolio/posts/tec-h-header-only-testing-for-c-and-c-without-the-ceremony.html"
+        />
+
+        <meta
+            property="og:title"
+            content="tec.h: header-only testing for C (and C++) without the ceremony"
+        />
+        <meta
+            property="og:description"
+            content="Drop one header in. Write a test. Compile. Run. That&#039;s the whole product. I got tired of unit testing in C feeling like a side quest with its own build system, package manager, and personality. So I wrote [tec.h](https://github.com/ShashwatAgrawal20/tec.h)."
+        />
+        <meta
+            property="og:image"
+            content="https://shashwatagrawal20.github.io/portfolio/assets/og/og_image.png"
+        />
+        <meta
+            property="og:image:alt"
+            content="tec.h: header-only testing for C (and C++) without the ceremony"
+        />
+        <meta
+            property="og:url"
+            content="https://shashwatagrawal20.github.io/portfolio/posts/tec-h-header-only-testing-for-c-and-c-without-the-ceremony.html"
+        />
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="Shashwat Agrawal" />
+        <meta
+            property="article:published_time"
+            content="2026-07-22T05:57:58.000Z"
+        />
+        <meta
+            property="article:modified_time"
+            content="2026-07-22T05:57:58.000Z"
+        />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+            name="twitter:title"
+            content="tec.h: header-only testing for C (and C++) without the ceremony"
+        />
+        <meta
+            name="twitter:description"
+            content="Drop one header in. Write a test. Compile. Run. That&#039;s the whole product. I got tired of unit testing in C feeling like a side quest with its own build system, package manager, and personality. So I wrote [tec.h](https://github.com/ShashwatAgrawal20/tec.h)."
+        />
+        <meta
+            name="twitter:image"
+            content="https://shashwatagrawal20.github.io/portfolio/assets/og/og_image.png"
+        />
+
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="../assets/icons/apple-touch-icon.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="../assets/icons/favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="../assets/icons/favicon-16x16.png"
+        />
+        <link rel="manifest" href="../assets/icons/site.webmanifest" />
+        <link rel="stylesheet" href="../style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <a href="../index.html" class="back-link"> < Back to Portfolio </a>
+            <article>
+                <h1>
+                    tec.h: header-only testing for C (and C++) without the
+                    ceremony
+                </h1>
+                <div class="post-meta">
+                    Posted on July 22, 2026 ·
+                    <span class="post-reading">6 min read</span> ·
+                    <span class="post-words">1,162 words</span> •
+                    <a
+                        href="https://github.com/ShashwatAgrawal20/portfolio/issues/3"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Discuss on GitHub
+                    </a>
+                </div>
+                <div class="post-actions">
+                    <button
+                        type="button"
+                        class="post-action-btn"
+                        id="copy-link-btn"
+                    >
+                        Copy link
+                    </button>
+                </div>
+                <div class="post-content">
+                    <blockquote>
+                        <p>
+                            Drop one header in. Write a test. Compile. Run.
+                            That’s the whole product.
+                        </p>
+                    </blockquote>
+                    <p>
+                        I got tired of unit testing in C feeling like a side
+                        quest with its own build system, package manager, and
+                        personality. So I wrote
+                        <a href="https://github.com/ShashwatAgrawal20/tec.h"
+                            >tec.h</a
+                        >.
+                    </p>
+                    <h2 id="table-of-contents" tabindex="-1">
+                        Table of Contents
+                    </h2>
+                    <ol>
+                        <li><a href="#the-problem">The problem</a></li>
+                        <li><a href="#what-tech-is">What tec.h is</a></li>
+                        <li><a href="#minimal-example">Minimal example</a></li>
+                        <li>
+                            <a
+                                href="#how-registration-works-the-interesting-bit"
+                                >How registration works (the interesting bit)</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#failure-longjmp-vs-exceptions"
+                                >Failure: longjmp vs exceptions</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#stuff-that-grew-in-once-the-basics-worked"
+                                >Stuff that grew in once the basics worked</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#c-without-a-second-library"
+                                >C++ without a second library</a
+                            >
+                        </li>
+                        <li><a href="#what-its-not">What it’s not</a></li>
+                        <li><a href="#try-it">Try it</a></li>
+                        <li><a href="#wrapping-up">Wrapping up</a></li>
+                    </ol>
+                    <h2 id="the-problem" tabindex="-1">The problem</h2>
+                    <p>
+                        In Python or Rust, testing is boring in a good way. You
+                        write the thing, you assert, you run the runner.
+                    </p>
+                    <p>In C, the options often look like:</p>
+                    <ul>
+                        <li>
+                            <strong>Pull in a framework</strong> that wants
+                            CMake, a vendored copy, and half a day of “why is
+                            this not linking”
+                        </li>
+                        <li>
+                            <strong
+                                >Write your own <code>assert</code> soup</strong
+                            >
+                            in <code>main</code>, forget to call half the tests,
+                            ship bugs
+                        </li>
+                        <li>
+                            <strong>Use something excellent but heavy</strong>
+                            for a 200-line library that just needed five checks
+                        </li>
+                    </ul>
+                    <p>I wanted the boring path:</p>
+                    <ol>
+                        <li>One file in the tree</li>
+                        <li>No “test framework project”</li>
+                        <li>Same mental model in C and C++</li>
+                        <li>
+                            Automatic discovery so I can’t forget to register a
+                            test
+                        </li>
+                    </ol>
+                    <p>
+                        That’s the bar. Not “replace GoogleTest for a monorepo.”
+                        Just: <strong>get out of the way.</strong>
+                    </p>
+                    <h2 id="what-tec-h-is" tabindex="-1">What tec.h is</h2>
+                    <p>
+                        <a href="https://github.com/ShashwatAgrawal20/tec.h"
+                            >tec.h</a
+                        >
+                        is a <strong>header-only</strong> unit test library for
+                        C and C++.
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Zero setup</strong>:
+                            <code>#define TEC_IMPLEMENTATION</code> in exactly
+                            one translation unit,
+                            <code>#include &quot;tec.h&quot;</code> everywhere
+                            else that needs it
+                        </li>
+                        <li>
+                            <strong>No build magic required</strong>: raw
+                            <code>gcc</code> / <code>clang</code> is enough
+                        </li>
+                        <li>
+                            <strong>Suites + automatic registration</strong>:
+                            <code>TEC(suite, name) { ... }</code> and you’re on
+                            the list
+                        </li>
+                        <li>
+                            <strong>Rich assertions</strong>: eq/ne,
+                            comparisons, strings, null, floats with tolerance,
+                            C++ throws
+                        </li>
+                        <li>
+                            <strong>Fixtures</strong>: suite setup/teardown and
+                            per-test setup/teardown
+                        </li>
+                        <li>
+                            <strong
+                                >XFAIL / skip / filters / fail-fast /
+                                colors</strong
+                            >
+                            (including <code>NO_COLOR</code>)
+                        </li>
+                        <li>
+                            <strong>MSVC</strong>: works; C tests go through as
+                            C++ there because MSVC and GNU constructor tricks
+                            are not friends
+                        </li>
+                    </ul>
+                    <p>
+                        Early project, API can still move. It already runs real
+                        tests for me daily. That’s enough honesty.
+                    </p>
+                    <h2 id="minimal-example" tabindex="-1">Minimal example</h2>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-c"><span class="line"><span style="color:#8B949E">// my_test.c</span></span>
+<span class="line"><span style="color:#FF7B72">#define</span><span style="color:#D2A8FF"> TEC_IMPLEMENTATION</span></span>
+<span class="line"><span style="color:#FF7B72">#include</span><span style="color:#A5D6FF"> "tec.h"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D2A8FF">TEC</span><span style="color:#E6EDF3">(arithmetic, test_addition) {</span></span>
+<span class="line"><span style="color:#D2A8FF">    TEC_ASSERT_EQ</span><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">2</span><span style="color:#FF7B72"> +</span><span style="color:#79C0FF"> 2</span><span style="color:#E6EDF3">, </span><span style="color:#79C0FF">4</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#D2A8FF">    TEC_ASSERT_NE</span><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">2</span><span style="color:#FF7B72"> +</span><span style="color:#79C0FF"> 2</span><span style="color:#E6EDF3">, </span><span style="color:#79C0FF">5</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D2A8FF">TEC</span><span style="color:#E6EDF3">(string_test, test_strings) {</span></span>
+<span class="line"><span style="color:#FF7B72">    const</span><span style="color:#FF7B72"> char</span><span style="color:#FF7B72"> *</span><span style="color:#E6EDF3">str </span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF"> "hello"</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#D2A8FF">    TEC_ASSERT_STR_EQ</span><span style="color:#E6EDF3">(str, </span><span style="color:#A5D6FF">"hello"</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D2A8FF">TEC_MAIN</span><span style="color:#E6EDF3">()</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FFA657">gcc</span><span style="color:#A5D6FF"> my_test.c</span><span style="color:#79C0FF"> -o</span><span style="color:#A5D6FF"> test_runner</span><span style="color:#E6EDF3"> &#x26;&#x26; </span><span style="color:#FFA657">./test_runner</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        You get suite grouping, pass/fail marks, assertion
+                        counts. There is no step five.
+                    </p>
+                    <p>
+                        For a multi-file project: put
+                        <code>TEC_IMPLEMENTATION</code> +
+                        <code>TEC_MAIN()</code> in one
+                        <code>test_runner.c</code>, write tests in other
+                        <code>.c</code> files that only
+                        <code>#include &quot;tec.h&quot;</code>, link them
+                        together. The sample Makefile in the repo finds tests
+                        for you if you want that.
+                    </p>
+                    <h2
+                        id="how-registration-works-the-interesting-bit"
+                        tabindex="-1"
+                    >
+                        How registration works (the interesting bit)
+                    </h2>
+                    <p>
+                        The part people ask about is:
+                        <strong
+                            >how do tests show up without a central
+                            list?</strong
+                        >
+                    </p>
+                    <h3 id="c-constructors" tabindex="-1">C: constructors</h3>
+                    <p>
+                        On GCC/Clang, each <code>TEC(suite, name)</code> expands
+                        roughly to:
+                    </p>
+                    <ol>
+                        <li>
+                            A <code>static</code> function that is the test body
+                        </li>
+                        <li>
+                            A
+                            <code
+                                >static void __attribute__((constructor))</code
+                            >
+                            function that runs
+                            <strong>before <code>main</code></strong>
+                        </li>
+                        <li>
+                            That constructor calls
+                            <code>tec_register(...)</code> with suite, name,
+                            file, function pointer
+                        </li>
+                    </ol>
+                    <p>
+                        So by the time <code>TEC_MAIN()</code>'s
+                        <code>main</code> runs, the registry is already full.
+                        You never maintain a table by hand. Forget to link a
+                        test object file and that test is gone - same as any
+                        other unit test setup - but you never forget to
+                        <em>append one more line to a giant array</em>.
+                    </p>
+                    <h3 id="c-static-objects-with-constructors" tabindex="-1">
+                        C++: static objects with constructors
+                    </h3>
+                    <p>In C++, the same idea uses a small helper type:</p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-cpp"><span class="line"><span style="color:#FF7B72">struct</span><span style="color:#FFA657"> tec_auto_register</span><span style="color:#E6EDF3"> {</span></span>
+<span class="line"><span style="color:#D2A8FF">    tec_auto_register</span><span style="color:#E6EDF3">(..., </span><span style="color:#79C0FF">tec_func_t</span><span style="color:#FFA657"> func</span><span style="color:#E6EDF3">, </span><span style="color:#FF7B72">bool</span><span style="color:#FFA657"> xfail</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#D2A8FF">        tec_register</span><span style="color:#E6EDF3">(...);</span></span>
+<span class="line"><span style="color:#E6EDF3">    }</span></span>
+<span class="line"><span style="color:#E6EDF3">};</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Each test gets a
+                        <code>static tec_auto_register</code> instance.
+                        Construction order does the registration. Fixtures use
+                        the same pattern.
+                    </p>
+                    <p>
+                        Macros glue the name tokens into unique symbols so two
+                        tests don’t collide at link time.
+                    </p>
+                    <p>
+                        This is old-school C++ “nifty counter / static init”
+                        energy applied to tests. Not novel. Very effective.
+                    </p>
+                    <h2 id="failure-longjmp-vs-exceptions" tabindex="-1">
+                        Failure: longjmp vs exceptions
+                    </h2>
+                    <p>
+                        When an assertion fails, the test has to
+                        <strong>stop that test</strong> without killing the
+                        whole process, and ideally still allow cleanup.
+                    </p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mode</th>
+                                <th>Mechanism</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>C</td>
+                                <td>
+                                    <code>setjmp</code> /
+                                    <code>longjmp</code> out of the assertion
+                                    into the runner
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>C++ with exceptions</td>
+                                <td>
+                                    throw <code>tec_assertion_failure</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>C++ with <code>-fno-exceptions</code></td>
+                                <td>
+                                    falls back to <code>longjmp</code> like C
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>That split matters:</p>
+                    <ul>
+                        <li>
+                            <strong>C:</strong> if you allocate, then assert,
+                            then <code>free</code>, a failed assert skips the
+                            free unless you structure it. Use
+                            <code>TEC_TRY_BLOCK({ ... assertions ... })</code>
+                            so a failure jumps to the end of the block and
+                            cleanup after the block still runs.
+                        </li>
+                        <li>
+                            <strong>C++:</strong> prefer RAII. Destructors run
+                            on throw. If you insist on raw <code>new</code>,
+                            <code>try/catch</code>, clean up, rethrow so the
+                            runner still records a failure.
+                        </li>
+                        <li>
+                            <strong
+                                ><code
+                                    >TEC_ASSERT_THROWS(stmt, Type)</code
+                                ></strong
+                            >
+                            (C++ with exceptions): assert that code throws the
+                            type you expect. Wrong type or no throw = fail.
+                        </li>
+                    </ul>
+                    <p>
+                        I did not invent process isolation. A crashing test can
+                        still take down the process. This is a
+                        <strong>unit</strong> runner, not a fuzz harness.
+                    </p>
+                    <h2
+                        id="stuff-that-grew-in-once-the-basics-worked"
+                        tabindex="-1"
+                    >
+                        Stuff that grew in once the basics worked
+                    </h2>
+                    <p>
+                        Once “register + assert + report” worked, the annoying
+                        parts of real projects showed up.
+                    </p>
+                    <h3 id="filters" tabindex="-1">Filters</h3>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FFA657">./test_runner</span><span style="color:#79C0FF"> -f</span><span style="color:#A5D6FF"> math</span><span style="color:#8B949E">              # substring on suite.test</span></span>
+<span class="line"><span style="color:#FFA657">./test_runner</span><span style="color:#79C0FF"> -f</span><span style="color:#A5D6FF"> '!slow'</span><span style="color:#8B949E">           # exclude</span></span>
+<span class="line"><span style="color:#FFA657">./test_runner</span><span style="color:#79C0FF"> --file</span><span style="color:#79C0FF"> -f</span><span style="color:#A5D6FF"> math_tests</span><span style="color:#8B949E"> # filter by source filename</span></span>
+<span class="line"><span style="color:#FFA657">./test_runner</span><span style="color:#79C0FF"> --fail-fast</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Positive filters include; <code>!</code> filters veto.
+                        Multiple flags OR for includes, veto always wins. Simple
+                        substring matching, not regex. Good enough for “run the
+                        suite I’m editing.”
+                    </p>
+                    <h3 id="xfail-and-skip" tabindex="-1">XFAIL and skip</h3>
+                    <ul>
+                        <li>
+                            <code>TEC_SKIP(&quot;reason&quot;)</code> - park a
+                            test without deleting it
+                        </li>
+                        <li>
+                            <code>TEC_XFAIL(suite, name) { ... }</code> -
+                            <strong>must fail</strong> to count as success. If
+                            it starts passing, that’s an unexpected pass (XPASS)
+                            and you get yelled at - usually because someone
+                            fixed the bug and forgot the XFAIL
+                        </li>
+                    </ul>
+                    <p>
+                        Useful for TDD and for tracking known broken behavior
+                        without red CI forever.
+                    </p>
+                    <h3 id="fixtures" tabindex="-1">Fixtures</h3>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-c"><span class="line"><span style="color:#D2A8FF">TEC_SETUP</span><span style="color:#E6EDF3">(buffer_tests) {</span><span style="color:#8B949E"> /* once per suite */</span><span style="color:#E6EDF3"> }</span></span>
+<span class="line"><span style="color:#D2A8FF">TEC_TEARDOWN</span><span style="color:#E6EDF3">(buffer_tests) {</span><span style="color:#8B949E"> /* once per suite */</span><span style="color:#E6EDF3"> }</span></span>
+<span class="line"><span style="color:#D2A8FF">TEC_TEST_SETUP</span><span style="color:#E6EDF3">(buffer_tests) {</span><span style="color:#8B949E"> /* before each test */</span><span style="color:#E6EDF3"> }</span></span>
+<span class="line"><span style="color:#D2A8FF">TEC_TEST_TEARDOWN</span><span style="color:#E6EDF3">(buffer_tests) {</span><span style="color:#8B949E"> /* after each test */</span><span style="color:#E6EDF3"> }</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Suite setup failure skips the suite. Per-test setup
+                        failure skips that test. Same constructor/static
+                        registration path as tests.
+                    </p>
+                    <h3 id="floats" tabindex="-1">Floats</h3>
+                    <p>
+                        <code>TEC_ASSERT_EQ</code> on doubles is how you hurt
+                        yourself. Use <code>TEC_ASSERT_FLOAT_EQ</code> (default
+                        epsilon-ish tolerance) or
+                        <code>TEC_ASSERT_NEAR(a, b, tol)</code> when you know
+                        the budget.
+                    </p>
+                    <h3 id="timing-and-output" tabindex="-1">
+                        Timing and output
+                    </h3>
+                    <p>
+                        Per-test / suite / total timing landed because “which
+                        test got slow” is a real question. Colors auto-detect
+                        TTY; honor <code>NO_COLOR</code> /
+                        <code>FORCE_COLOR</code>; <code>--no-color</code> and
+                        <code>--ascii</code> when your terminal is from 1995 or
+                        you’re piping to a file.
+                    </p>
+                    <h2 id="c-without-a-second-library" tabindex="-1">
+                        C++ without a second library
+                    </h2>
+                    <p>
+                        Same header. Same <code>TEC()</code> macros. Compile as
+                        C++ and you get exceptions (when enabled),
+                        <code>TEC_ASSERT_THROWS</code>, and you can use
+                        <code>std::vector</code>, smart pointers, etc. in tests
+                        without a parallel framework.
+                    </p>
+                    <p>
+                        There’s a <code>tec_showcase.cpp</code> in the repo that
+                        flexes STL + RAII + XFAIL around intentional failures.
+                        Point is:
+                        <strong>one include for both languages</strong>,
+                        behavior adapts instead of forking the API.
+                    </p>
+                    <h2 id="what-it-s-not" tabindex="-1">What it’s not</h2>
+                    <ul>
+                        <li>Not a mocking framework</li>
+                        <li>
+                            Not a benchmark harness (timers are for humans, not
+                            publication)
+                        </li>
+                        <li>Not process-isolated</li>
+                        <li>
+                            Not “stable 1.0 forever” yet - early, still moving
+                        </li>
+                        <li>
+                            Not trying to win a feature war with Catch2 /
+                            GoogleTest / Unity
+                        </li>
+                    </ul>
+                    <p>
+                        If you need death tests, parameterized combinatorics,
+                        and XML for a dashboard, use the big tools. If you need
+                        <strong
+                            >five suites for a C library without reenacting
+                            Enterprise Build</strong
+                        >, tec.h is aimed at you.
+                    </p>
+                    <h2 id="try-it" tabindex="-1">Try it</h2>
+                    <p>
+                        Repo:
+                        <a href="https://github.com/ShashwatAgrawal20/tec.h"
+                            >github.com/ShashwatAgrawal20/tec.h</a
+                        >
+                    </p>
+
+                    <div class="code-wrapper">
+                        <pre
+                            class="shiki github-dark-default"
+                            style="background-color: #0d1117; color: #e6edf3"
+                            tabindex="0"
+                        ><code class="language-bash"><span class="line"><span style="color:#FFA657">git</span><span style="color:#A5D6FF"> clone</span><span style="color:#A5D6FF"> https://github.com/ShashwatAgrawal20/tec.h</span></span>
+<span class="line"><span style="color:#79C0FF">cd</span><span style="color:#A5D6FF"> tec.h</span></span>
+<span class="line"><span style="color:#8B949E"># single-file mental model:</span></span>
+<span class="line"><span style="color:#8B949E"># copy tec.h, write tests, TEC_MAIN(), compile</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8B949E"># or use the project layout + make:</span></span>
+<span class="line"><span style="color:#FFA657">make</span><span style="color:#A5D6FF"> test</span></span></code></pre>
+
+                        <button type="button" class="copy-btn">Copy</button>
+                    </div>
+                    <p>
+                        Read the README for the full assertion table and fixture
+                        docs. This post is the
+                        <strong>why and how it works</strong>, not a second
+                        manual.
+                    </p>
+                    <h2 id="wrapping-up" tabindex="-1">Wrapping up</h2>
+                    <p>
+                        <code>tec.h</code> exists because I wanted tests in C to
+                        feel like a default, not a dependency negotiation.
+                    </p>
+                    <p>
+                        One header. Constructor-based registration. Assertions
+                        that stop the test without deleting the runner. C and
+                        C++ sharing the same macros. Filters and XFAIL when the
+                        project stops being a toy.
+                    </p>
+                    <p>
+                        If you try it and something’s dumb, open an issue or a
+                        PR. If you just needed permission to skip the CMake
+                        ceremony for a small library: granted. Drop the header
+                        in and write the damn test.
+                    </p>
+                    <hr />
+                    <p>
+                        <strong>Project:</strong>
+                        <a href="https://github.com/ShashwatAgrawal20/tec.h"
+                            >tec.h</a
+                        ><br />
+                        <strong>License:</strong> see repo (MIT-style in tree)
+                    </p>
+                </div>
+            </article>
+            <nav
+                class="post-nav"
+                id="post-nav"
+                aria-label="Adjacent posts"
+            ></nav>
+        </div>
+        <button
+            type="button"
+            id="back-to-top"
+            class="back-to-top"
+            aria-label="Back to top"
+        >
+            ↑ Top
+        </button>
+
+        <script>
+            (function () {
+                const SLUG =
+                    "tec-h-header-only-testing-for-c-and-c-without-the-ceremony";
+
+                document.addEventListener("click", async (e) => {
+                    const btn = e.target.closest(".copy-btn");
+                    if (!btn) return;
+                    const wrapper = btn.closest(".code-wrapper");
+                    const codeEl = wrapper && wrapper.querySelector("pre");
+                    if (!codeEl) return;
+                    const code = codeEl.textContent.trim();
+                    btn.disabled = true;
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        btn.textContent = "Copied!";
+                    } catch (err) {
+                        console.error(err);
+                        btn.textContent = "Failed";
+                    }
+                    setTimeout(() => {
+                        btn.textContent = "Copy";
+                        btn.disabled = false;
+                    }, 1500);
+                });
+
+                const copyLinkBtn = document.getElementById("copy-link-btn");
+                if (copyLinkBtn) {
+                    copyLinkBtn.addEventListener("click", async () => {
+                        const url = window.location.href.split("#")[0];
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            copyLinkBtn.textContent = "Copied!";
+                        } catch (err) {
+                            console.error(err);
+                            copyLinkBtn.textContent = "Failed";
+                        }
+                        setTimeout(() => {
+                            copyLinkBtn.textContent = "Copy link";
+                        }, 1500);
+                    });
+                }
+
+                document
+                    .querySelectorAll(
+                        ".post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]",
+                    )
+                    .forEach((heading) => {
+                        heading.style.cursor = "pointer";
+                        heading.title = "Click to copy link to this section";
+                        heading.addEventListener("click", async (e) => {
+                            if (e.target.closest("a")) return;
+                            const url =
+                                window.location.href.split("#")[0] +
+                                "#" +
+                                heading.id;
+                            try {
+                                await navigator.clipboard.writeText(url);
+                                heading.classList.add("heading-copied");
+                                setTimeout(() => {
+                                    heading.classList.remove("heading-copied");
+                                }, 1200);
+                            } catch (err) {
+                                console.error(err);
+                            }
+                        });
+                    });
+
+                const topBtn = document.getElementById("back-to-top");
+                if (topBtn) {
+                    const onScroll = () => {
+                        if (window.scrollY > 400)
+                            topBtn.classList.add("visible");
+                        else topBtn.classList.remove("visible");
+                    };
+                    window.addEventListener("scroll", onScroll, {
+                        passive: true,
+                    });
+                    onScroll();
+                    topBtn.addEventListener("click", () => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    });
+                }
+
+                const nav = document.getElementById("post-nav");
+                if (nav) {
+                    fetch("../blog-posts.json")
+                        .then((r) => (r.ok ? r.json() : []))
+                        .then((posts) => {
+                            if (!Array.isArray(posts) || !posts.length) return;
+                            const idx = posts.findIndex((p) => p.slug === SLUG);
+                            if (idx < 0) return;
+                            const newer = idx > 0 ? posts[idx - 1] : null;
+                            const older =
+                                idx < posts.length - 1 ? posts[idx + 1] : null;
+                            let html = "";
+                            if (older) {
+                                html +=
+                                    '<a class="post-nav-prev" href="../' +
+                                    older.url +
+                                    '">&larr; ' +
+                                    escapeHtml(older.title) +
+                                    "</a>";
+                            } else {
+                                html += "<span></span>";
+                            }
+                            if (newer) {
+                                html +=
+                                    '<a class="post-nav-next" href="../' +
+                                    newer.url +
+                                    '">' +
+                                    escapeHtml(newer.title) +
+                                    " &rarr;</a>";
+                            } else {
+                                html += "<span></span>";
+                            }
+                            nav.innerHTML = html;
+                        })
+                        .catch((err) => console.error(err));
+                }
+
+                function escapeHtml(text) {
+                    const d = document.createElement("div");
+                    d.textContent = text;
+                    return d.innerHTML;
+                }
+            })();
+        </script>
+    </body>
+</html>
